@@ -1,0 +1,43 @@
+&CONTROL 
+   calculation = 'vc-relax'
+   restart_mode = 'from_scratch' 
+   prefix = 'BeN' 
+   tstress = .true. 
+   tprnfor = .true. 
+   pseudo_dir = './pseudo' 
+   outdir = './output' 
+   forc_conv_thr = 0.001
+   etot_conv_thr = 1e-05
+&end 
+&SYSTEM 
+   ibrav = 2 
+   nat = 2 
+   ntyp = 2 
+   celldm(1) = 6.847585039461167 
+   ecutwfc = 80 
+   occupations = 'smearing' 
+   smearing = 'marzari-vanderbilt' 
+   degauss = 0.02 
+&end 
+&ELECTRONS 
+   conv_thr =  1e-07 
+   mixing_beta = 0.7 
+&end 
+&IONS 
+   ion_dynamics = 'bfgs' 
+&end 
+&CELL 
+   cell_dynamics = 'bfgs' 
+   cell_dofree = 'ibrav' 
+   press = 500.0 
+&end 
+
+ATOMIC_SPECIES 
+Be 9.012182 Be_ONCV_PBE_sr.upf
+C 12.0107 C_ONCV_PBE_sr.upf
+
+ATOMIC_POSITIONS crystal 
+   Be    0.0    0.0    0.0    
+   C    0.5    0.5    -0.5    
+K_POINTS automatic 
+7  7  7    0  0  0  
