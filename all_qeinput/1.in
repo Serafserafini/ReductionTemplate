@@ -13,7 +13,7 @@
    ibrav = 2 
    nat = 2 
    ntyp = 2 
-   celldm(1) = 6.847585039461167 
+   celldm(1) = 6.651939752619421 
    ecutwfc = 80 
    occupations = 'smearing' 
    smearing = 'marzari-vanderbilt' 
@@ -33,11 +33,11 @@
 &end 
 
 ATOMIC_SPECIES 
-Be 9.012182 Be_ONCV_PBE_sr.upf
-C 12.0107 C_ONCV_PBE_sr.upf
+   Be   9.012182    Be_ONCV_PBE_sr.upf 
+   N   14.0067    N_ONCV_PBE_sr.upf 
 
 ATOMIC_POSITIONS crystal 
    Be    0.0    0.0    0.0    
-   C    0.5    0.5    -0.5    
+   N    0.5    0.5    -0.5    
 K_POINTS automatic 
 7  7  7    0  0  0  
