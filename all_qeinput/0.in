@@ -1,7 +1,7 @@
 &CONTROL 
    calculation = 'vc-relax'
    restart_mode = 'from_scratch' 
-   prefix = 'LiC' 
+   prefix = 'NaLi' 
    tstress = .true. 
    tprnfor = .true. 
    pseudo_dir = './pseudo' 
@@ -13,8 +13,8 @@
    ibrav = 4 
    nat = 4 
    ntyp = 2 
-   celldm(1) = 2.774474286319971 
-   celldm(3) = 2.0738391076692704 
+   celldm(1) = 2.379914410847482 
+   celldm(3) = 3.339146222325672 
    ecutwfc = 80 
    occupations = 'smearing' 
    smearing = 'marzari-vanderbilt' 
@@ -34,13 +34,13 @@
 &end 
 
 ATOMIC_SPECIES 
-C 12.0107 C_ONCV_PBE_sr.upf
+Be 9.012182 Be_ONCV_PBE_sr.upf
 O 15.9994 O_ONCV_PBE_sr.upf
 
 ATOMIC_POSITIONS crystal 
-   C    0.33333333    0.66666667    0.32659    
-   C    0.66666667    0.33333333    0.6734100000000001    
-   O    0.33333333    0.66666667    0.961074    
-   O    0.66666667    0.33333333    0.038926000000000016    
+   Be    0.33333333    0.66666667    0.25    
+   Be    0.66666667    0.33333333    0.75    
+   O    0.0    0.0    0.0    
+   O    0.0    0.0    0.5    
 K_POINTS automatic 
-10  10  5    0  0  0  
+10  10  3    0  0  0  
