@@ -1,7 +1,7 @@
 &CONTROL 
    calculation = 'vc-relax'
    restart_mode = 'from_scratch' 
-   prefix = 'BeO' 
+   prefix = 'NaMg' 
    tstress = .true. 
    tprnfor = .true. 
    pseudo_dir = './pseudo' 
@@ -10,11 +10,11 @@
    etot_conv_thr = 1e-05
 &end 
 &SYSTEM 
-   ibrav = 4 
-   nat = 4 
+   ibrav = 6 
+   nat = 2 
    ntyp = 2 
-   celldm(1) = 4.394134514143885 
-   celldm(3) = 1.624195748397271 
+   celldm(1) = 4.964665233788466 
+   celldm(3) = 1.5274813159618603 
    ecutwfc = 80 
    occupations = 'smearing' 
    smearing = 'marzari-vanderbilt' 
@@ -34,13 +34,11 @@
 &end 
 
 ATOMIC_SPECIES 
-B 10.811 B_ONCV_PBE_sr.upf
-N 14.0067 N_ONCV_PBE_sr.upf
+   Na   22.98976928    Na_ONCV_PBE_sr.upf 
+   Mg   24.305    Mg_ONCV_PBE_sr.upf 
 
 ATOMIC_POSITIONS crystal 
-   B    0.33333333    0.66666667    0.507825    
-   B    0.66666666    0.33333333    0.007824999999999971    
-   N    0.33333333    0.66666667    0.13035    
-   N    0.66666666    0.33333333    0.63035    
+   Na    0.0    0.0    0.0    
+   Mg    0.5    0.5    0.5    
 K_POINTS automatic 
 10  10  6    0  0  0  
