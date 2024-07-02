@@ -13,7 +13,7 @@
    ibrav = 7 
    nat = 4 
    ntyp = 2 
-   celldm(1) = 5.657289678020672 
+   celldm(1) = 3.463646741645311 
    celldm(3) = 2.8090146963171305 
    ecutwfc = 80 
    occupations = 'smearing' 
@@ -34,13 +34,13 @@
 &end 
 
 ATOMIC_SPECIES 
+B 10.811 B_ONCV_PBE_sr.upf
 N 14.0067 N_ONCV_PBE_sr.upf
-Na 22.98976928 Na_ONCV_PBE_sr.upf
 
 ATOMIC_POSITIONS crystal 
-   N    0.0    0.352722    0.352722    
-   N    0.0    0.647278    0.647278    
-   Na    0.0    0.072696    0.072696    
-   Na    0.0    0.927304    0.927304    
+   B    0.0    0.352722    0.352722    
+   B    0.0    0.647278    0.647278    
+   N    0.0    0.072696    0.072696    
+   N    0.0    0.927304    0.927304    
 K_POINTS automatic 
 10  10  3    0  0  0  
