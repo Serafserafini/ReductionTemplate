@@ -6,7 +6,6 @@ import pandas as pd
 import subprocess
 import shutil
 import time
-import sys
 from tqdm import tqdm
 
 from pymatgen.core import Element
