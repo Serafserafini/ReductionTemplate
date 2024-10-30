@@ -1,0 +1,147 @@
+{
+    "0": {
+        "couples": [
+            "AlS"
+        ],
+        "freq": 0.009523809523809525
+    },
+    "1": {
+        "couples": [
+            "BP",
+            "PSi",
+            "CSi",
+            "BeS",
+            "FH"
+        ],
+        "freq": 0.047619047619047616
+    },
+    "2": {
+        "couples": [
+            "NaP",
+            "AlSi",
+            "MgN",
+            "FLi",
+            "MgS",
+            "AlP",
+            "BeP",
+            "MgO",
+            "ClLi",
+            "HLi"
+        ],
+        "freq": 0.09523809523809523
+    },
+    "3": {
+        "couples": [
+            "FS",
+            "OS",
+            "ClO",
+            "HO",
+            "FN",
+            "NO",
+            "BF",
+            "FP",
+            "BC",
+            "CP",
+            "ClH",
+            "HP"
+        ],
+        "freq": 0.11428571428571428
+    },
+    "4": {
+        "couples": [
+            "BeLi",
+            "BeO",
+            "AlN",
+            "NP",
+            "CCl",
+            "AlC",
+            "ClF",
+            "BLi",
+            "HSi",
+            "BH",
+            "BeC",
+            "CMg",
+            "HS",
+            "AlNa",
+            "HN",
+            "FSi"
+        ],
+        "freq": 0.1523809523809524
+    },
+    "5": {
+        "couples": [
+            "BN",
+            "CS",
+            "OSi",
+            "ClP",
+            "AlBe",
+            "AlMg",
+            "NNa",
+            "HMg",
+            "CLi",
+            "ClN",
+            "ClSi",
+            "ClS",
+            "BNa",
+            "BeCl",
+            "BeF",
+            "MgNa",
+            "LiNa",
+            "SSi",
+            "PS"
+        ],
+        "freq": 0.18095238095238095
+    },
+    "6": {
+        "couples": [
+            "MgP",
+            "FNa",
+            "ClNa",
+            "HNa",
+            "FO",
+            "BBe",
+            "NaSi",
+            "NaO",
+            "LiMg",
+            "LiN",
+            "NaS",
+            "AlLi",
+            "MgSi",
+            "LiS",
+            "LiSi",
+            "LiP",
+            "NSi",
+            "BeMg",
+            "LiO",
+            "AlH"
+        ],
+        "freq": 0.19047619047619047
+    },
+    "7": {
+        "couples": [
+            "ClMg",
+            "AlCl",
+            "BeN",
+            "FMg",
+            "AlO",
+            "BeNa",
+            "BMg",
+            "CNa",
+            "BO",
+            "CN",
+            "BS",
+            "NS",
+            "BeH",
+            "CF",
+            "CH",
+            "BCl",
+            "AlB",
+            "BSi",
+            "CO",
+            "BeSi",
+            "OP",
+            "AlF"
+        ],
+        "freq": 0.20952380952380953
+    }
+}

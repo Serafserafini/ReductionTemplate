@@ -36,12 +36,13 @@ def levensthein_distance(a1,a2):
     return dist
 
 class TemplateSet:
-    def __init__(self, test_elements, restart_file = None,   comp = 1, mother_dir = './SETUP_FILES/') -> None:
+    def __init__(self, test_elements, restart_file = None,   comp = 1, mother_dir = './SETUP_FILES/', clusters = None) -> None:
         self.dir_all_Individuals = mother_dir + 'all_Individuals/'
         self.dir_all_poscars = mother_dir + 'all_poscars/'
         self.dir_all_qeoutput = mother_dir + 'all_qeoutput/'
         self.dir_all_qeinput = mother_dir + 'all_qeinput/'
         self.dir_all_cif = mother_dir + 'all_cif/'
+
 
         #create_directory(self.dir_all_qeoutput)
         #create_directory(self.dir_all_qeinput)
@@ -69,6 +70,18 @@ class TemplateSet:
         self.num_template = 0
         self.n_fails = 0
         
+        self.flag_cluster = False
+        if clusters is not None:
+            self.trial_cluster = None
+            self.flag_cluster = True
+            self.couples_in_clusters = []
+            self.original_clusters = []
+            self.freq_cluster = []
+            for cluster in clusters.keys():
+                self.couples_in_clusters.append([])
+                self.original_clusters.append((int(cluster)-1,clusters[cluster]['couples']))
+                self.freq_cluster.append(clusters[cluster]['freq'])
+            
         self.couples = [] #Couples chosen for the templates
         self.banned_couples = [] #Couples with no available templates (Already  chosen or non existent)
         self.poscars = []
@@ -136,13 +149,65 @@ class TemplateSet:
         return True
     
     def try_new_couple(self):
-        self.trial_couple = None
-        self.trial_poscar = None
-        self.trial_SG = None
         count_flag = 0
+
+
         while count_flag<=50:
             count_flag+=1
-            extraction_list = [x for x in self.gen_couples if x not in self.banned_couples]
+
+            self.trial_couple = None
+            self.trial_poscar = None
+            self.trial_SG = None
+
+            if self.flag_cluster:
+                self.trial_cluster = None
+                flag_cluster_found = False
+
+                idx_empty_clusters = []
+                for idx, cluster in enumerate(self.couples_in_clusters):
+                    if len(cluster) == 0:
+                        idx_empty_clusters.append(idx)
+
+                if len(idx_empty_clusters) != 0:
+                    freq_empty_clusters = [self.freq_cluster[x] for x in idx_empty_clusters]
+                    rnum = random.uniform(0, sum(freq_empty_clusters))
+                    for idx, freq in enumerate(freq_empty_clusters):
+                        if rnum < freq:
+                            extraction_list = [[x[0],x[1]] for x in self.original_clusters[idx_empty_clusters[idx]][1] if x not in self.banned_couples]
+
+
+                            if len(extraction_list) == 0:
+                                del self.couples_in_clusters[idx_empty_clusters[idx]]
+                                del self.freq_cluster[idx_empty_clusters[idx]]
+                                del self.original_clusters[idx_empty_clusters[idx]]
+                                break
+                            flag_cluster_found = True
+                            self.trial_cluster = idx_empty_clusters[idx]
+                            break
+                        else:
+                            rnum -= freq
+                else:
+                    rnum = random.uniform(0, sum(self.freq_cluster))
+                    for idx, freq in enumerate(self.freq_cluster):
+                        if rnum < freq:
+                            extraction_list = [x for x in self.original_clusters[idx][1] if x not in self.banned_couples]
+
+                            if len(extraction_list) == 0:
+                                del self.original_clusters[idx]
+                                del self.freq_cluster[idx]
+                                break
+                            flag_cluster_found = True  
+                            self.trial_cluster = self.original_clusters[idx][0]                           
+                            break
+                        else:
+                            rnum -= freq
+                        
+                if not flag_cluster_found:
+                    continue
+            
+            else:
+                extraction_list = [x for x in self.gen_couples if x not in self.banned_couples]
+            
             causal_el = random.sample(extraction_list,1)[0]
             
             A=causal_el[0]
@@ -323,6 +388,7 @@ class TemplateSet:
     def update(self, n_possible_templates):
         new_tuple = (self.trial_couple, self.trial_SG)
         self.couples.append(new_tuple)
+        self.couples_in_clusters[self.trial_cluster].append(new_tuple)
         self.poscars.append(self.trial_poscar)
         self.num_template += 1
         self.order()
@@ -691,8 +757,8 @@ class PairSet:
         return err
     
 
-def generate_one_templateset(hyperparameters, test_elements):
-    template = TemplateSet(test_elements=test_elements, comp = hyperparameters['comp'])
+def generate_one_templateset(hyperparameters, test_elements, clusters):
+    template = TemplateSet(test_elements=test_elements, comp = hyperparameters['comp'], clusters=clusters)
 
     tries = 0
 
