@@ -21,7 +21,7 @@ with open('clusters.json', 'r') as f:
 
 hyperparameters = {
     'ntemp_start' : 1,
-    'ntemp_end' : 78,
+    'ntemp_end' : 58,
 
     'comp' : 1,
     'lev_gen' : 0.8,
@@ -40,24 +40,18 @@ hyperparameters = {
 
 random.seed(time.time())
 
-for pesi in tqdm(range(20,101,20)):
-    hyperparameters["n_pairs"] = pesi 
-    
-    # Number of possible couples
-    n_possible_couples = 210
-    if hyperparameters['comp'] == 1:
-        n_possible_couples = 105
+# Number of possible couples
+n_possible_couples = 210
+if hyperparameters['comp'] == 1:
+    n_possible_couples = 105
 
 
-    dir_temp = f'./{hyperparameters["lev_red"]}_{hyperparameters["n_pairs"]}/'
-    create_directory(dir_temp)
+dir_temp = f'./CLUSTER METHOD/'
+create_directory(dir_temp)
 
-    import json
-    with open(dir_temp + 'params.json', 'w') as f:
-        json.dump(hyperparameters, f, indent=4)
-
-    # Errore dei vari set con fissato numero di template estratti, su
-
+import json
+with open(dir_temp + 'params.json', 'w') as f:
+    json.dump(hyperparameters, f, indent=4)
 
 # Errore dei vari set con fissato numero di template estratti, su ogni possible coppia
     dif_vec = np.zeros((hyperparameters['n_sets'], n_possible_couples)) 
