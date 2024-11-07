@@ -4,7 +4,7 @@ import random
 import pandas as pd
 import time
 from tqdm import tqdm
-from template_csp.managetempcluster import generate_one_templateset, generate_one_pairset, graph_difference_std
+from template_csp.managetemp import generate_one_templateset, generate_one_pairset, graph_difference_std
 import json
 
 def create_directory(directory):
@@ -25,7 +25,7 @@ hyperparameters = {
 
     'comp' : 1,
     'lev_gen' : 0.8,
-    'n_sets' : 5,
+    'n_sets' : 20,
     'n_template' : 1,
 
     'id_set' : 1,
@@ -70,7 +70,7 @@ with open(dir_temp + 'params.json', 'w') as f:
     # Vettori per il numero di template rimanenti e la loro deviazione standard
     temp_red = np.zeros((2, ntemp_studied))
 
-    for i in tqdm(range(hyperparameters['ntemp_start'],hyperparameters['ntemp_end'], 2)):
+    for i in tqdm(range(hyperparameters['ntemp_start'],hyperparameters['ntemp_end'], 1)):
 
         hyperparameters['n_template'] = i
 
