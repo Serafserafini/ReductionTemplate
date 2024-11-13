@@ -1,9 +1,6 @@
 .thesisenv
-ALLTEMPONERESEARCH
-LevRed_Npairs
-CLUSTER METHOD
-FigureData
-FULL*
-PARAMETERS
+CLUSTERS
+RANDOM
 template_csp/__pycache__
+PROVACLUSTER
 *.png

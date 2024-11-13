@@ -388,7 +388,8 @@ class TemplateSet:
     def update(self, n_possible_templates):
         new_tuple = (self.trial_couple, self.trial_SG)
         self.couples.append(new_tuple)
-        self.couples_in_clusters[self.trial_cluster].append(new_tuple)
+        if self.flag_cluster:
+            self.couples_in_clusters[self.trial_cluster].append(new_tuple)
         self.poscars.append(self.trial_poscar)
         self.num_template += 1
         self.order()
@@ -428,7 +429,7 @@ class TemplateSet:
                 file.write(str(i))
         return
 class PairSet:
-    def __init__(self, template_set, test_elements, relaxed_pairs = None, comp=1, mother_dir = './SETUP_FILES/', flag_temp_final = False  ) -> None:
+    def __init__(self, template_set, test_elements, relaxed_pairs = None, comp=1, mother_dir = './SETUP_FILES/', flag_temp_final = False, clusters = None) -> None:
         
         #DA METTERE INDIPENDENZA DA TEMPLATE SET
         self.test_elements=test_elements
@@ -438,6 +439,19 @@ class PairSet:
         self.n_fails = 0
         self.num_template = template_set.num_template
         self.comp = template_set.comp
+
+        self.possible_couples = []
+        if comp == 1:
+            for i in range(len(test_elements)):
+                for j in range(i+1, len(test_elements)):
+                    elAelB = [test_elements[i], test_elements[j]]
+                    elAelB.sort()
+                    self.possible_couples.append(elAelB)
+        else:
+            for i in test_elements:
+                for j in test_elements:
+                    elAelB = [i, j]
+                    self.possible_couples.append(elAelB)
 
         self.couples = []
         self.banned_couples = []
@@ -461,6 +475,17 @@ class PairSet:
         self.one_el = pd.read_csv(os.path.join(os.path.dirname(os.path.dirname(__file__)),f'A{comp}B/relaxation/OneElementEnt.txt'), sep=',', header=None, na_filter=False)
         self.gs_df = pd.read_csv(os.path.join(os.path.dirname(os.path.dirname(__file__)),f'A{comp}B/relaxation/GroundStates.txt'), sep=",", na_filter = False)
 
+        self.flag_cluster = False
+        if clusters is not None:
+            self.trial_cluster = None
+            self.flag_cluster = True
+            self.couples_in_clusters = []
+            self.original_clusters = []
+            self.freq_cluster = []
+            for cluster in clusters.keys():
+                self.couples_in_clusters.append([])
+                self.original_clusters.append((int(cluster)-1,clusters[cluster]['couples']))
+                self.freq_cluster.append(clusters[cluster]['freq'])
 
         if relaxed_pairs is not None:
             self.from_scratch = False
@@ -511,7 +536,55 @@ class PairSet:
                 return
             tries+=1
             while True:
-                causal_el = random.sample(self.test_elements, 2)
+                if self.flag_cluster:
+                    self.trial_cluster = None
+                    flag_cluster_found = False
+
+                    idx_empty_clusters = []
+                    for idx, cluster in enumerate(self.couples_in_clusters):
+                        if len(cluster) == 0:
+                            idx_empty_clusters.append(idx)
+
+                    if len(idx_empty_clusters) != 0:
+                        freq_empty_clusters = [self.freq_cluster[x] for x in idx_empty_clusters]
+                        rnum = random.uniform(0, sum(freq_empty_clusters))
+                        for idx, freq in enumerate(freq_empty_clusters):
+                            if rnum < freq:
+                                extraction_list = [[x[0],x[1]] for x in self.original_clusters[idx_empty_clusters[idx]][1] if (x not in self.banned_couples and x not in self.couples)]
+
+                                if len(extraction_list) == 0:
+                                    del self.couples_in_clusters[idx_empty_clusters[idx]]
+                                    del self.freq_cluster[idx_empty_clusters[idx]]
+                                    del self.original_clusters[idx_empty_clusters[idx]]
+                                    break
+                                flag_cluster_found = True
+                                
+                                self.trial_cluster = idx_empty_clusters[idx]
+                                break
+                            else:
+                                rnum -= freq
+                    else:
+                        rnum = random.uniform(0, sum(self.freq_cluster))
+                        for idx, freq in enumerate(self.freq_cluster):
+                            if rnum < freq:
+                                extraction_list = [x for x in self.original_clusters[idx][1] if (x not in self.banned_couples and x not in self.couples)]
+
+                                if len(extraction_list) == 0:
+                                    del self.original_clusters[idx]
+                                    del self.freq_cluster[idx]
+                                    break
+                                flag_cluster_found = True  
+                                self.trial_cluster = self.original_clusters[idx][0]                           
+                                break
+                            else:
+                                rnum -= freq
+                            
+                    if not flag_cluster_found:
+                        continue
+                else:
+                    extraction_list = [x for x in self.possible_couples if (x not in self.banned_couples and x not in self.couples)]
+
+                causal_el = random.sample(extraction_list,1)[0]
                 if self.comp == 1:
                     causal_el.sort()
                 if causal_el in self.banned_couples:
@@ -555,6 +628,8 @@ class PairSet:
         self.data[1,:,-1] = self.num_pairs
         self.data[2,:,-1] = np.arange(0, self.num_template, 1)
         self.couples.append([A,B])
+        if self.flag_cluster:
+            self.couples_in_clusters[self.trial_cluster].append([A,B])
         self.num_pairs += 1
         return
     
@@ -757,7 +832,7 @@ class PairSet:
         return err
     
 
-def generate_one_templateset(hyperparameters, test_elements, clusters = False):
+def generate_one_templateset(hyperparameters, test_elements, clusters = None):
     template = TemplateSet(test_elements=test_elements, comp = hyperparameters['comp'], clusters=clusters)
 
     tries = 0
@@ -813,8 +888,8 @@ def generate_one_templateset(hyperparameters, test_elements, clusters = False):
         tries = 0
     return template
 
-def generate_one_pairset (template_prod, hyperparameters, test_elements):
-    reduction_set = PairSet(template_prod, test_elements, comp=hyperparameters['comp'])
+def generate_one_pairset (template_prod, hyperparameters, test_elements, clusters = None):
+    reduction_set = PairSet(template_prod, test_elements, comp=hyperparameters['comp'], clusters=clusters)
     reduction_set.make_input()
 
     while reduction_set.num_pairs < hyperparameters['n_pairs']:
