@@ -3,4 +3,8 @@ CLUSTERS
 RANDOM
 template_csp/__pycache__
 PROVACLUSTER
+RANDOM_NO_LEV
+ErrBefore.csv
+dist*
 *.png
+DIFFERENT*

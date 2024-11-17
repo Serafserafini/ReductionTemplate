@@ -42,7 +42,7 @@ class TemplateSet:
         self.dir_all_qeoutput = mother_dir + 'all_qeoutput/'
         self.dir_all_qeinput = mother_dir + 'all_qeinput/'
         self.dir_all_cif = mother_dir + 'all_cif/'
-
+        self.test_elements = test_elements
 
         #create_directory(self.dir_all_qeoutput)
         #create_directory(self.dir_all_qeinput)
@@ -65,6 +65,8 @@ class TemplateSet:
                     self.gen_couples.append(elAelB)
 
         self.df = pd.read_csv(os.path.join(os.path.dirname(os.path.dirname(__file__)),f'A{comp}B/relaxation/RELAX_DATA'), sep=",", index_col=0, na_filter = False)
+        self.gs_df = pd.read_csv(os.path.join(os.path.dirname(os.path.dirname(__file__)),f'A{comp}B/relaxation/GroundStates.txt'), sep=",", na_filter = False)
+
 
         self.comp = comp
         self.num_template = 0
@@ -378,14 +380,14 @@ class TemplateSet:
             self.data[1,i] = self.data[1,i, sorted_indices[i]]
         return
     
-    def distance(self, array):
+    def distance(self, dist_function, array):
         # Compute the Levenshtein distance between the rows of the first matrix and the array
-        lev = np.zeros(self.data.shape[1])
+        distances = np.zeros(self.data.shape[1])
         for i in range(self.data.shape[1]):
-            lev[i] = levensthein_distance(self.data[1,i], array)
-        return lev
+            distances[i] = dist_function(self.data[:,i, :], array) # TODO BEFORE IT WAS distances[i] = levensthein_distance(self.data[1,i], array)
+        return distances
 
-    def update(self, n_possible_templates):
+    def update(self, n_possible_templates, hyperparameters):
         new_tuple = (self.trial_couple, self.trial_SG)
         self.couples.append(new_tuple)
         if self.flag_cluster:
@@ -395,6 +397,7 @@ class TemplateSet:
         self.order()
         with open('log.txt','a') as fstdout:
                 fstdout.write(f'The new template has been added to the set succesfully: {self.trial_couple[0]+self.trial_couple[1]} {self.trial_SG} \n')
+                fstdout.write(f'The current distance threshold is {hyperparameters["lev_gen"]}\n')
         count = 0
         for i in self.couples:
             if i[0] == self.trial_couple:
@@ -428,11 +431,34 @@ class TemplateSet:
             for i in self.poscars:
                 file.write(str(i))
         return
+    
+    def err_before(self):
+        differences = []
+        for k in range(len(self.test_elements)):
+            for l in range(k+1,len(self.test_elements)):
+                cp = [self.test_elements[k], self.test_elements[l]]
+                cp.sort()
+                try_couple = cp[0]+cp[1]
+
+                ent_gs = (self.gs_df.loc[self.gs_df['COUPLES'] == try_couple].iloc[0,1]) #already per atom  
+                ent_temp = np.zeros(self.num_template)
+                for id_template in range(self.num_template):
+                    ent_temp[id_template] = self.df.loc[try_couple, f'{self.couples[id_template][0][0]}{self.couples[id_template][0][1]}_{self.couples[id_template][1]}'] #already per atom
+                ent_temp.sort()
+                differences.append( -( ent_gs - ent_temp[0] )) 
+        err = 0
+        for i in differences:
+            err += max(i/len(differences), 0)
+        return err
+
+
+
 class PairSet:
-    def __init__(self, template_set, test_elements, relaxed_pairs = None, comp=1, mother_dir = './SETUP_FILES/', flag_temp_final = False, clusters = None) -> None:
+    def __init__(self, template_set, test_elements, dist_function = levensthein_distance, relaxed_pairs = None, comp=1, mother_dir = './SETUP_FILES/', flag_temp_final = False, clusters = None) -> None:
         
         #DA METTERE INDIPENDENZA DA TEMPLATE SET
         self.test_elements=test_elements
+        self.dist_function = dist_function 
         self.from_scratch = True   
         self.flag_temp_final = flag_temp_final
         self.num_pairs = 0
@@ -593,8 +619,8 @@ class PairSet:
                     A=causal_el[0]
                     B=causal_el[1]
                     break
-            with open('log.txt','a') as fstdout:
-                    fstdout.write(f'Trying add to pair-set the couple {A+B} (Try#{tries})\n')
+            # with open('log.txt','a') as fstdout:
+            #         fstdout.write(f'Trying add to pair-set the couple {A+B} (Try#{tries})\n')
 
             new_ranking = np.zeros(self.num_template)
             for i in range(self.num_template):
@@ -655,16 +681,6 @@ class PairSet:
                 file.write(f'{i}:{arr} \n')
         return
 
-    def order_wrt_pairs(self): #moves the pairs
-        # Order the matrix by rows of first matrix
-        matrix = self.data.copy()
-        sorted_indices = np.argsort(matrix[0], axis=1)
-        for i in range(matrix.shape[1]):
-            matrix[0,i] = matrix[0,i, sorted_indices[i]]
-            matrix[1,i] = matrix[1,i, sorted_indices[i]]
-            matrix[2,i] = matrix[2,i, sorted_indices[i]]
-        return matrix
-
     def order_wrt_templates(self): #moves the templates
         # Oreder the matrix by columns of first matrix
         matrix = self.data.copy()
@@ -680,10 +696,10 @@ class PairSet:
     def dist_matrix(self):
         # Compute the distance matrix between the templates moving the pairs
         dist = np.zeros((self.num_template, self.num_template))
-        matrix = self.order_wrt_pairs()
+        matrix = self.data.copy()
         for i in range(self.num_template):
             for j in range(self.num_template):
-                dist[i,j] = levensthein_distance(matrix[1,i], matrix[1,j])*2/(self.num_pairs+1)
+                dist[i,j] = self.dist_function(matrix[:,i,:], matrix[:,j,:])
         return dist
     
     def make_input(self):
@@ -713,35 +729,43 @@ class PairSet:
             # Compute the reduced set of templates
             form_negative = self.formation_percentage()
             ist = self.template_gs()
+            sg = self.sg.copy()
 
             set_of_templates = [x for x in range(self.num_template)]
-            set_of_removed_templates = []
             lev_matrix = self.dist_matrix()
+            np.fill_diagonal(lev_matrix, 10)
 
-            for i in range(self.num_template):
-                if set_of_templates[i] in set_of_removed_templates:
-                    continue
-                for j in range(i+1,self.num_template):
-                    if set_of_templates[j] in set_of_removed_templates:
-                        continue
-                    if lev_matrix[i,j] < hyperparameters['lev_red']:
-                        a_j = form_negative[j] * hyperparameters['weight_formation_entalphy'] 
-                        b_j = ist[j] * hyperparameters['weight_occurrence']/self.num_pairs
-                        c_j = self.sg[j] * hyperparameters['weight_sg']
+            while lev_matrix.min() < hyperparameters['lev_red']:
+                idx = np.unravel_index(np.argmin(lev_matrix), lev_matrix.shape)
+                i = idx[0]
+                j = idx[1]
 
-                        a_i = form_negative[i] * hyperparameters['weight_formation_entalphy']
-                        b_i = ist[i] * hyperparameters['weight_occurrence']/self.num_pairs
-                        c_i = self.sg[i] * hyperparameters['weight_sg']
+                a_j = form_negative[j] * hyperparameters['weight_formation_entalphy'] 
+                b_j = ist[j] * hyperparameters['weight_occurrence']/self.num_pairs
+                c_j = sg[j] * hyperparameters['weight_sg']
 
-                        score_j = a_j + b_j + c_j
-                        score_i = a_i + b_i + c_i
-                        
-                        if score_j > score_i:
-                            set_of_removed_templates.append(set_of_templates[i])
-                            break
-                        else:
-                            set_of_removed_templates.append(set_of_templates[j])
-            return [x for x in set_of_templates if x not in set_of_removed_templates]
+                a_i = form_negative[i] * hyperparameters['weight_formation_entalphy']
+                b_i = ist[i] * hyperparameters['weight_occurrence']/self.num_pairs
+                c_i = sg[i] * hyperparameters['weight_sg']
+
+                score_j = a_j + b_j + c_j
+                score_i = a_i + b_i + c_i
+                
+                if score_j > score_i:
+                    set_of_templates = np.delete(set_of_templates, i)
+                    lev_matrix = np.delete(lev_matrix, i, axis=0)
+                    lev_matrix = np.delete(lev_matrix, i, axis=1)
+                    form_negative = np.delete(form_negative, i)
+                    ist = np.delete(ist, i)
+                    sg = np.delete(sg, i)
+                else:
+                    set_of_templates = np.delete(set_of_templates, j)
+                    lev_matrix = np.delete(lev_matrix, j, axis=0)
+                    lev_matrix = np.delete(lev_matrix, j, axis=1)
+                    form_negative = np.delete(form_negative, j)
+                    ist = np.delete(ist, j)
+                    sg = np.delete(sg, j)
+
 
         else:
             # Compute the reduced set of templates
@@ -785,7 +809,7 @@ class PairSet:
                     sg = np.delete(sg, j)
                 
 
-            return set_of_templates
+        return set_of_templates
 
     def error_single_composition(self, hyperparameters):
         # Compute the error of the single composition
@@ -832,7 +856,7 @@ class PairSet:
         return err
     
 
-def generate_one_templateset(hyperparameters, test_elements, clusters = None):
+def generate_one_templateset(hyperparameters, test_elements, dist_function, clusters = None):
     template = TemplateSet(test_elements=test_elements, comp = hyperparameters['comp'], clusters=clusters)
 
     tries = 0
@@ -841,22 +865,22 @@ def generate_one_templateset(hyperparameters, test_elements, clusters = None):
         # set the trial couple and return the number of possible templates remaining for that couple
         n_possible_temp = template.try_new_couple()
         template.own_relax()
-        template.update(n_possible_temp)
+        template.update(n_possible_temp, hyperparameters)
         #with open('log.txt','a') as fstdout:
         #   fstdout.write(f'Class set inizialized: \n{template.data}\n')
 
     while template.num_template < hyperparameters['n_template']:
         if tries >= 10:
             with open('log.txt','a') as fstdout:
-                fstdout.write(f'WARNING: too many tries, lowering lev thr from {hyperparameters["lev_gen"]} to {hyperparameters["lev_gen"]-0.1}\n')
-            hyperparameters["lev_gen"] -= 0.1  
+                fstdout.write(f'WARNING: too many tries, lowering lev thr from {hyperparameters["lev_gen"]} to {hyperparameters["lev_gen"]-hyperparameters["step"]}\n')
+            hyperparameters["lev_gen"] -= hyperparameters["step"] 
             tries = 0 
         tries += 1
 
-        with open('log.txt','a') as fstdout:
-            fstdout.write(f'Possible couples:{[x for x in template.gen_couples if x not in template.banned_couples]}\n')
-            fstdout.write(f'Banned Couples:{template.banned_couples}\n')
-            fstdout.write(f'Chosen Couples:{template.couples}\n')
+        # with open('log.txt','a') as fstdout:
+        #     fstdout.write(f'Possible couples:{[x for x in template.gen_couples if x not in template.banned_couples]}\n')
+        #     fstdout.write(f'Banned Couples:{template.banned_couples}\n')
+        #     fstdout.write(f'Chosen Couples:{template.couples}\n')
 
         # Try a new couple
         n_possible_temp = template.try_new_couple()
@@ -866,14 +890,15 @@ def generate_one_templateset(hyperparameters, test_elements, clusters = None):
             continue
         # Compute all the lev dist with other vectors
         if not clusters:
-            lev_dist = template.distance(vec[1])*2/(template.num_template+1)
-            with open('log.txt','a') as fstdout:
-                fstdout.write(f'Try #{tries} \n Levenshtein distances: {lev_dist}\n')
-
-            if np.any(lev_dist < hyperparameters["lev_gen"]) and template.num_template > 5:
+            if template.num_template > 2:
+                lev_dist = template.distance(dist_function, vec)
                 with open('log.txt','a') as fstdout:
-                    fstdout.write('Levensthein distance too low with some other template, trying new couple \n')
-                continue
+                    fstdout.write(f'Try #{tries} \n Levenshtein distances: {lev_dist}\n')
+
+                if np.any(lev_dist < hyperparameters["lev_gen"]):
+                    with open('log.txt','a') as fstdout:
+                        fstdout.write('Levensthein distance too low with some other template, trying new couple \n')
+                    continue
 
         vec = template.own_relax(vec)
         if not template.flag_conv:
@@ -884,12 +909,15 @@ def generate_one_templateset(hyperparameters, test_elements, clusters = None):
             continue
 
         template.add_row(*vec)
-        template.update(n_possible_temp)
+        template.update(n_possible_temp, hyperparameters)
         tries = 0
+        if hyperparameters["lev_gen"] < hyperparameters["lev_gen_initial"]:
+            hyperparameters["lev_gen"] = hyperparameters["lev_gen"] + 2 * hyperparameters["step"]
+
     return template
 
-def generate_one_pairset (template_prod, hyperparameters, test_elements, clusters = None):
-    reduction_set = PairSet(template_prod, test_elements, comp=hyperparameters['comp'], clusters=clusters)
+def generate_one_pairset (template_prod, hyperparameters, test_elements, dist_function, clusters = None):
+    reduction_set = PairSet(template_prod, test_elements, dist_function, comp=hyperparameters['comp'], clusters=clusters)
     reduction_set.make_input()
 
     while reduction_set.num_pairs < hyperparameters['n_pairs']:
@@ -926,7 +954,6 @@ def graph_difference_std (dif_mean, dif_std, n_temp, c_value, dir_temp, hyperpar
     fig.savefig(percorso_completo)
     
     return
-
 
 #Run pw.x in parallel using file input and output
 def run_pw(fileinput, fileoutput, nproc):
