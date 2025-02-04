@@ -1,0 +1,55 @@
+&CONTROL 
+   calculation = 'vc-relax'
+   restart_mode = 'from_scratch' 
+   prefix = 'H3C' 
+   tstress = .true. 
+   tprnfor = .true. 
+   pseudo_dir = '../pseudo' 
+   outdir = './output' 
+   forc_conv_thr = 0.001
+   etot_conv_thr = 0.0001
+&end 
+&SYSTEM 
+   ibrav = 5 
+   nat = 8 
+   ntyp = 2 
+   celldm(1) = 6.082446438094997 
+   celldm(4) = -0.23164574354115347 
+   ecutwfc = 80 
+   occupations = 'smearing' 
+   smearing = 'marzari-vanderbilt' 
+   degauss = 0.02 
+&end 
+&ELECTRONS 
+   conv_thr =  1e-08 
+   mixing_beta = 0.7 
+   electron_maxstep =100
+&end 
+&IONS 
+   ion_dynamics = 'bfgs' 
+   upscale = 100.0
+   trust_radius_max = 0.8
+&end 
+&CELL 
+   cell_dynamics = 'bfgs' 
+   cell_dofree = 'ibrav' 
+   cell_factor = 4.0 
+   press_conv_thr = 1.0 
+   press = 500.0 
+&end 
+
+ATOMIC_SPECIES 
+   H   1.00794    H_ONCV_PBE_sr.upf 
+   C   12.0107    C_ONCV_PBE_sr.upf 
+
+ATOMIC_POSITIONS crystal 
+   H    1.5820849900000002    -0.024973000000000023    0.7835550000000001    
+   H    -0.5820849899999996    0.024973000000000023    1.216445    
+   H    0.7835550000000003    0.58208499    0.9750270000000002    
+   H    0.2164450000000005    -0.58208499    1.024973    
+   H    0.9750270000000006    -0.216445    1.58208499    
+   H    0.024973000000000106    0.21644500000000008    0.41791501000000014    
+   C    0.3169870000000001    0.3169870000000001    0.3169870000000001    
+   C    0.6830130000000001    0.6830130000000001    0.6830130000000001    
+K_POINTS automatic 
+8  8  8    0  0  0  

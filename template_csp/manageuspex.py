@@ -67,14 +67,5 @@ def best_structures(individuals_df, fitness_upto, gatheredPOSCARS_path):
     return uniques, SGs
 
 
-#Copy Individuals and gatheredPoscars files 
-def copy_files(A, B, dir_all_poscars, dir_all_Individuals, comp):
-    try:
-        shutil.copyfile(os.path.join(os.path.dirname(os.path.dirname(__file__)),f'A{comp}B/OUTPUTFILES/{A+B}/{A+B}_gatheredPOSCARS'), dir_all_poscars+f'{A+B}_gatheredPOSCARS')
-        shutil.copyfile(os.path.join(os.path.dirname(os.path.dirname(__file__)),f'A{comp}B/OUTPUTFILES/{A+B}/{A+B}_Individuals'), dir_all_Individuals+f'{A+B}_Individuals')
-    except:
-        with open('Errors.txt', 'a') as file:
-            file.write(f'Error in copying {A+B} files: remember to put the files in the A{comp}B/OUTPUTFILES/{A+B}/ directory\n')
-        raise
-    return
+
 

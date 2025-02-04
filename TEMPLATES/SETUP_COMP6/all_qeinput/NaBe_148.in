@@ -1,0 +1,54 @@
+&CONTROL 
+   calculation = 'vc-relax'
+   restart_mode = 'from_scratch' 
+   prefix = 'Na6Be' 
+   tstress = .true. 
+   tprnfor = .true. 
+   pseudo_dir = '../pseudo' 
+   outdir = './output' 
+   forc_conv_thr = 0.001
+   etot_conv_thr = 0.0001
+&end 
+&SYSTEM 
+   ibrav = 5 
+   nat = 7 
+   ntyp = 2 
+   celldm(1) = 8.464245417500289 
+   celldm(4) = -0.12094620621785496 
+   ecutwfc = 80 
+   occupations = 'smearing' 
+   smearing = 'marzari-vanderbilt' 
+   degauss = 0.02 
+&end 
+&ELECTRONS 
+   conv_thr =  1e-08 
+   mixing_beta = 0.7 
+   electron_maxstep =100
+&end 
+&IONS 
+   ion_dynamics = 'bfgs' 
+   upscale = 100.0
+   trust_radius_max = 0.8
+&end 
+&CELL 
+   cell_dynamics = 'bfgs' 
+   cell_dofree = 'ibrav' 
+   cell_factor = 4.0 
+   press_conv_thr = 1.0 
+   press = 500.0 
+&end 
+
+ATOMIC_SPECIES 
+   Na   22.98976928    Na_ONCV_PBE_sr.upf 
+   Be   9.012182    Be_ONCV_PBE_sr.upf 
+
+ATOMIC_POSITIONS crystal 
+   Na    0.95174451    -0.6188084999999997    0.23811450000000003    
+   Na    0.04825549000000029    0.6188085000000004    1.7618855000000002    
+   Na    0.2381145000000001    -0.0482554899999999    0.3811915000000001    
+   Na    0.7618855000000002    0.048255490000000734    1.6188085    
+   Na    0.3811915000000001    -0.7618854999999995    0.95174451    
+   Na    0.6188085000000002    0.7618855000000003    1.0482554900000003    
+   Be    0.5000000000000001    0.5000000000000001    0.5000000000000001    
+K_POINTS automatic 
+6  6  6    0  0  0  

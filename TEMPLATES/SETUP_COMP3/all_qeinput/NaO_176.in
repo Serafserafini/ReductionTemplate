@@ -1,0 +1,55 @@
+&CONTROL 
+   calculation = 'vc-relax'
+   restart_mode = 'from_scratch' 
+   prefix = 'Na3O' 
+   tstress = .true. 
+   tprnfor = .true. 
+   pseudo_dir = '../pseudo' 
+   outdir = './output' 
+   forc_conv_thr = 0.001
+   etot_conv_thr = 0.0001
+&end 
+&SYSTEM 
+   ibrav = 4 
+   nat = 8 
+   ntyp = 2 
+   celldm(1) = 9.792489313376535 
+   celldm(3) = 0.6443753421773346 
+   ecutwfc = 80 
+   occupations = 'smearing' 
+   smearing = 'marzari-vanderbilt' 
+   degauss = 0.02 
+&end 
+&ELECTRONS 
+   conv_thr =  1e-08 
+   mixing_beta = 0.7 
+   electron_maxstep =100
+&end 
+&IONS 
+   ion_dynamics = 'bfgs' 
+   upscale = 100.0
+   trust_radius_max = 0.8
+&end 
+&CELL 
+   cell_dynamics = 'bfgs' 
+   cell_dofree = 'ibrav' 
+   cell_factor = 4.0 
+   press_conv_thr = 1.0 
+   press = 500.0 
+&end 
+
+ATOMIC_SPECIES 
+   Na   22.98976928    Na_ONCV_PBE_sr.upf 
+   O   15.9994    O_ONCV_PBE_sr.upf 
+
+ATOMIC_POSITIONS crystal 
+   Na    0.10234800000000002    0.73325    0.25    
+   Na    0.897652    0.26675000000000004    0.75    
+   Na    0.36909800000000004    0.102348    0.75    
+   Na    0.630902    0.897652    0.25    
+   Na    0.26675000000000004    0.36909800000000004    0.25    
+   Na    0.73325    0.630902    0.75    
+   O    0.33333333    0.66666667    0.75    
+   O    0.66666667    0.33333333    0.25    
+K_POINTS automatic 
+5  5  8    0  0  0  

@@ -1,0 +1,51 @@
+&CONTROL 
+   calculation = 'vc-relax'
+   restart_mode = 'from_scratch' 
+   prefix = 'Mg3Be' 
+   tstress = .true. 
+   tprnfor = .true. 
+   pseudo_dir = '../pseudo' 
+   outdir = './output' 
+   forc_conv_thr = 0.001
+   etot_conv_thr = 0.0001
+&end 
+&SYSTEM 
+   ibrav = 6 
+   nat = 4 
+   ntyp = 2 
+   celldm(1) = 4.89748771853848 
+   celldm(3) = 2.71972579760032 
+   ecutwfc = 80 
+   occupations = 'smearing' 
+   smearing = 'marzari-vanderbilt' 
+   degauss = 0.02 
+&end 
+&ELECTRONS 
+   conv_thr =  1e-08 
+   mixing_beta = 0.7 
+   electron_maxstep =100
+&end 
+&IONS 
+   ion_dynamics = 'bfgs' 
+   upscale = 100.0
+   trust_radius_max = 0.8
+&end 
+&CELL 
+   cell_dynamics = 'bfgs' 
+   cell_dofree = 'ibrav' 
+   cell_factor = 4.0 
+   press_conv_thr = 1.0 
+   press = 500.0 
+&end 
+
+ATOMIC_SPECIES 
+   Mg   24.305    Mg_ONCV_PBE_sr.upf 
+   Be   9.012182    Be_ONCV_PBE_sr.upf 
+
+ATOMIC_POSITIONS crystal 
+   Mg    0.0    0.0    0.285164    
+   Mg    0.0    0.0    0.714836    
+   Mg    0.5    0.5    0.0    
+   Be    0.5    0.5    0.5    
+K_POINTS automatic 
+10  10  4    0  0  0  

@@ -180,6 +180,6 @@ def find_element_type(file_input):
 
 #Find Enthalpy from previous relaxed
 
-def find_enthalpy_relaxed(df, gen_couple, rel_couple, sg):
+def find_enthalpy_relaxed(df, rel_couple, gen_couple,  sg):
     enthalpy = df.loc[rel_couple, f'{gen_couple}_{sg}']
     return enthalpy

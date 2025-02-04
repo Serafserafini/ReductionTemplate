@@ -1,0 +1,50 @@
+&CONTROL 
+   calculation = 'vc-relax'
+   restart_mode = 'from_scratch' 
+   prefix = 'N2O' 
+   tstress = .true. 
+   tprnfor = .true. 
+   pseudo_dir = '../pseudo' 
+   outdir = './output' 
+   forc_conv_thr = 0.001
+   etot_conv_thr = 0.0001
+&end 
+&SYSTEM 
+   ibrav = 5 
+   nat = 3 
+   ntyp = 2 
+   celldm(1) = 5.380604735491592 
+   celldm(4) = -0.06831895746818752 
+   ecutwfc = 80 
+   occupations = 'smearing' 
+   smearing = 'marzari-vanderbilt' 
+   degauss = 0.02 
+&end 
+&ELECTRONS 
+   conv_thr =  1e-08 
+   mixing_beta = 0.7 
+   electron_maxstep =100
+&end 
+&IONS 
+   ion_dynamics = 'bfgs' 
+   upscale = 100.0
+   trust_radius_max = 0.8
+&end 
+&CELL 
+   cell_dynamics = 'bfgs' 
+   cell_dofree = 'ibrav' 
+   cell_factor = 4.0 
+   press_conv_thr = 1.0 
+   press = 500.0 
+&end 
+
+ATOMIC_SPECIES 
+   N   14.0067    N_ONCV_PBE_sr.upf 
+   O   15.9994    O_ONCV_PBE_sr.upf 
+
+ATOMIC_POSITIONS crystal 
+   N    0.23401299999999997    0.23401299999999997    0.23401299999999997    
+   N    0.4785416699999999    0.4785416699999999    0.4785416699999999    
+   O    0.7336629999999998    0.7336629999999998    0.7336629999999998    
+K_POINTS automatic 
+9  9  9    0  0  0  

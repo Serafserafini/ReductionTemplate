@@ -1,0 +1,53 @@
+&CONTROL 
+   calculation = 'vc-relax'
+   restart_mode = 'from_scratch' 
+   prefix = 'MgCl2' 
+   tstress = .true. 
+   tprnfor = .true. 
+   pseudo_dir = '../pseudo' 
+   outdir = './output' 
+   forc_conv_thr = 0.001
+   etot_conv_thr = 0.0001
+&end 
+&SYSTEM 
+   ibrav = 4 
+   nat = 6 
+   ntyp = 2 
+   celldm(1) = 5.896647908012278 
+   celldm(3) = 3.10023311069148 
+   ecutwfc = 80 
+   occupations = 'smearing' 
+   smearing = 'marzari-vanderbilt' 
+   degauss = 0.02 
+&end 
+&ELECTRONS 
+   conv_thr =  1e-08 
+   mixing_beta = 0.7 
+   electron_maxstep =100
+&end 
+&IONS 
+   ion_dynamics = 'bfgs' 
+   upscale = 100.0
+   trust_radius_max = 0.8
+&end 
+&CELL 
+   cell_dynamics = 'bfgs' 
+   cell_dofree = 'ibrav' 
+   cell_factor = 4.0 
+   press_conv_thr = 1.0 
+   press = 500.0 
+&end 
+
+ATOMIC_SPECIES 
+   Mg   24.305    Mg_ONCV_PBE_sr.upf 
+   Cl   35.453    Cl_ONCV_PBE_sr.upf 
+
+ATOMIC_POSITIONS crystal 
+   Mg    0.33333333    0.66666667    0.502691    
+   Mg    0.66666666    0.33333333    0.002690999999999999    
+   Cl    0.0    0.0    0.362035    
+   Cl    0.0    0.0    0.862035    
+   Cl    0.33333333    0.66666667    0.14313    
+   Cl    0.66666666    0.33333333    0.64313    
+K_POINTS automatic 
+8  8  3    0  0  0  

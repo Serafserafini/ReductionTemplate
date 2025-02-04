@@ -1,0 +1,57 @@
+&CONTROL 
+   calculation = 'vc-relax'
+   restart_mode = 'from_scratch' 
+   prefix = 'Al4Cl' 
+   tstress = .true. 
+   tprnfor = .true. 
+   pseudo_dir = '../pseudo' 
+   outdir = './output' 
+   forc_conv_thr = 0.001
+   etot_conv_thr = 0.0001
+&end 
+&SYSTEM 
+   ibrav = 4 
+   nat = 10 
+   ntyp = 2 
+   celldm(1) = 5.032283905604174 
+   celldm(3) = 7.523771682064981 
+   ecutwfc = 80 
+   occupations = 'smearing' 
+   smearing = 'marzari-vanderbilt' 
+   degauss = 0.02 
+&end 
+&ELECTRONS 
+   conv_thr =  1e-08 
+   mixing_beta = 0.7 
+   electron_maxstep =100
+&end 
+&IONS 
+   ion_dynamics = 'bfgs' 
+   upscale = 100.0
+   trust_radius_max = 0.8
+&end 
+&CELL 
+   cell_dynamics = 'bfgs' 
+   cell_dofree = 'ibrav' 
+   cell_factor = 4.0 
+   press_conv_thr = 1.0 
+   press = 500.0 
+&end 
+
+ATOMIC_SPECIES 
+   Al   26.9815386    Al_ONCV_PBE_sr.upf 
+   Cl   35.453    Cl_ONCV_PBE_sr.upf 
+
+ATOMIC_POSITIONS crystal 
+   Al    0.0    0.0    0.05164    
+   Al    0.0    0.0    0.467575    
+   Al    0.0    0.0    0.847996    
+   Al    0.33333333    0.66666667    0.259849    
+   Al    0.33333333    0.66666667    0.567696    
+   Al    0.66666667    0.33333333    0.155644    
+   Al    0.66666667    0.33333333    0.364687    
+   Al    0.66666667    0.33333333    0.948909    
+   Cl    0.33333333    0.66666667    0.765422    
+   Cl    0.66666667    0.33333333    0.650233    
+K_POINTS automatic 
+9  9  1    0  0  0  

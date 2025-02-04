@@ -1,0 +1,57 @@
+&CONTROL 
+   calculation = 'vc-relax'
+   restart_mode = 'from_scratch' 
+   prefix = 'Li4O' 
+   tstress = .true. 
+   tprnfor = .true. 
+   pseudo_dir = '../pseudo' 
+   outdir = './output' 
+   forc_conv_thr = 0.001
+   etot_conv_thr = 0.0001
+&end 
+&SYSTEM 
+   ibrav = 7 
+   nat = 10 
+   ntyp = 2 
+   celldm(1) = 10.014527485264312 
+   celldm(3) = 0.9406615074363147 
+   ecutwfc = 80 
+   occupations = 'smearing' 
+   smearing = 'marzari-vanderbilt' 
+   degauss = 0.02 
+&end 
+&ELECTRONS 
+   conv_thr =  1e-08 
+   mixing_beta = 0.7 
+   electron_maxstep =100
+&end 
+&IONS 
+   ion_dynamics = 'bfgs' 
+   upscale = 100.0
+   trust_radius_max = 0.8
+&end 
+&CELL 
+   cell_dynamics = 'bfgs' 
+   cell_dofree = 'ibrav' 
+   cell_factor = 4.0 
+   press_conv_thr = 1.0 
+   press = 500.0 
+&end 
+
+ATOMIC_SPECIES 
+   Li   6.941    Li_ONCV_PBE_sr.upf 
+   O   15.9994    O_ONCV_PBE_sr.upf 
+
+ATOMIC_POSITIONS crystal 
+   Li    -0.186681    0.4968015    0.3101205    
+   Li    0.313319    1.0601205    -0.2531985    
+   Li    0.18668099999999999    1.1234395    0.3101205    
+   Li    0.686681    0.06012050000000002    -0.6265605    
+   Li    -0.313319    1.2531984999999999    0.9398795    
+   Li    0.813319    0.6898795    -0.12343950000000004    
+   Li    0.313319    0.6265605    -0.06012050000000002    
+   Li    0.18668099999999999    0.6898795    -0.4968015    
+   O    0.0    0.0    0.0    
+   O    -0.5    0.75    0.25    
+K_POINTS automatic 
+5  5  5    0  0  0  

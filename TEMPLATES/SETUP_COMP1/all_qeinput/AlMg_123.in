@@ -1,0 +1,49 @@
+&CONTROL 
+   calculation = 'vc-relax'
+   restart_mode = 'from_scratch' 
+   prefix = 'MgAl' 
+   tstress = .true. 
+   tprnfor = .true. 
+   pseudo_dir = '../pseudo' 
+   outdir = './output' 
+   forc_conv_thr = 0.001
+   etot_conv_thr = 0.0001
+&end 
+&SYSTEM 
+   ibrav = 6 
+   nat = 2 
+   ntyp = 2 
+   celldm(1) = 4.759010590630321 
+   celldm(3) = 1.6063804048598394 
+   ecutwfc = 80 
+   occupations = 'smearing' 
+   smearing = 'marzari-vanderbilt' 
+   degauss = 0.02 
+&end 
+&ELECTRONS 
+   conv_thr =  1e-08 
+   mixing_beta = 0.7 
+   electron_maxstep =100
+&end 
+&IONS 
+   ion_dynamics = 'bfgs' 
+   upscale = 100.0
+   trust_radius_max = 0.8
+&end 
+&CELL 
+   cell_dynamics = 'bfgs' 
+   cell_dofree = 'ibrav' 
+   cell_factor = 4.0 
+   press_conv_thr = 1.0 
+   press = 500.0 
+&end 
+
+ATOMIC_SPECIES 
+   Mg   24.305    Mg_ONCV_PBE_sr.upf 
+   Al   26.9815386    Al_ONCV_PBE_sr.upf 
+
+ATOMIC_POSITIONS crystal 
+   Mg    0.5    0.5    0.0    
+   Al    0.0    0.0    0.5    
+K_POINTS automatic 
+10  10  6    0  0  0  

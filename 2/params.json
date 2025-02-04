@@ -1,0 +1,16 @@
+{
+    "ntemp_start": 1,
+    "ntemp_end": 30,
+    "comp": 2,
+    "lev_gen": 0.8,
+    "lev_gen_initial": 0.8,
+    "step": 0.1,
+    "n_sets": 5,
+    "n_template": 1,
+    "id_set": 1,
+    "lev_red": 0.9,
+    "weight_formation_entalphy": 1,
+    "weight_occurrence": 1,
+    "weight_sg": 0.001,
+    "n_pairs": 210
+}

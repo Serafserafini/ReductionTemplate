@@ -1,0 +1,37 @@
+# generated using pymatgen
+data_Mg6O
+_symmetry_space_group_name_H-M   P31m
+_cell_length_a   4.69599865
+_cell_length_b   4.69599865
+_cell_length_c   8.85990386
+_cell_angle_alpha   90.00000000
+_cell_angle_beta   90.00000000
+_cell_angle_gamma   120.00000000
+_symmetry_Int_Tables_number   157
+_chemical_formula_structural   Mg6O
+_chemical_formula_sum   'Mg12 O2'
+_cell_volume   169.20592557
+_cell_formula_units_Z   2
+loop_
+ _symmetry_equiv_pos_site_id
+ _symmetry_equiv_pos_as_xyz
+  1  'x, y, z'
+  2  '-y, x-y, z'
+  3  '-x+y, -x, z'
+  4  'y, x, z'
+  5  'x-y, -y, z'
+  6  '-x, -x+y, z'
+loop_
+ _atom_site_type_symbol
+ _atom_site_label
+ _atom_site_symmetry_multiplicity
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+  Mg  Mg0  3  0.00000000  0.32908750  0.62193100  1
+  Mg  Mg1  3  0.00000000  0.32952000  0.13422300  1
+  Mg  Mg2  3  0.00000000  0.67001850  0.86670400  1
+  Mg  Mg3  2  0.33333333  0.66666667  0.37846500  1
+  Mg  Mg4  1  0.00000000  0.00000000  0.37533300  1
+  O  O5  2  0.33333333  0.66666667  0.00146700  1

@@ -1,0 +1,53 @@
+&CONTROL 
+   calculation = 'vc-relax'
+   restart_mode = 'from_scratch' 
+   prefix = 'Si2S' 
+   tstress = .true. 
+   tprnfor = .true. 
+   pseudo_dir = '../pseudo' 
+   outdir = './output' 
+   forc_conv_thr = 0.001
+   etot_conv_thr = 0.0001
+&end 
+&SYSTEM 
+   ibrav = 7 
+   nat = 6 
+   ntyp = 2 
+   celldm(1) = 10.789173300212106 
+   celldm(3) = 0.7681404966690447 
+   ecutwfc = 80 
+   occupations = 'smearing' 
+   smearing = 'marzari-vanderbilt' 
+   degauss = 0.02 
+&end 
+&ELECTRONS 
+   conv_thr =  1e-08 
+   mixing_beta = 0.7 
+   electron_maxstep =100
+&end 
+&IONS 
+   ion_dynamics = 'bfgs' 
+   upscale = 100.0
+   trust_radius_max = 0.8
+&end 
+&CELL 
+   cell_dynamics = 'bfgs' 
+   cell_dofree = 'ibrav' 
+   cell_factor = 4.0 
+   press_conv_thr = 1.0 
+   press = 500.0 
+&end 
+
+ATOMIC_SPECIES 
+   Si   28.0855    Si_ONCV_PBE_sr.upf 
+   S   32.065    S_ONCV_PBE_sr.upf 
+
+ATOMIC_POSITIONS crystal 
+   Si    -0.20051950000000002    0.375    0.0755195    
+   Si    -0.7005195    1.8255195    0.625    
+   Si    0.20051949999999996    0.875    -0.8255195    
+   Si    0.7005195    0.9244805    0.125    
+   S    0.0    0.5    0.5    
+   S    -0.5    1.25    0.75    
+K_POINTS automatic 
+4  4  6    0  0  0  

@@ -1,0 +1,54 @@
+&CONTROL 
+   calculation = 'vc-relax'
+   restart_mode = 'from_scratch' 
+   prefix = 'Na6Li' 
+   tstress = .true. 
+   tprnfor = .true. 
+   pseudo_dir = '../pseudo' 
+   outdir = './output' 
+   forc_conv_thr = 0.001
+   etot_conv_thr = 0.0001
+&end 
+&SYSTEM 
+   ibrav = 5 
+   nat = 7 
+   ntyp = 2 
+   celldm(1) = 8.662459735001685 
+   celldm(4) = -0.19310376008347332 
+   ecutwfc = 80 
+   occupations = 'smearing' 
+   smearing = 'marzari-vanderbilt' 
+   degauss = 0.02 
+&end 
+&ELECTRONS 
+   conv_thr =  1e-08 
+   mixing_beta = 0.7 
+   electron_maxstep =100
+&end 
+&IONS 
+   ion_dynamics = 'bfgs' 
+   upscale = 100.0
+   trust_radius_max = 0.8
+&end 
+&CELL 
+   cell_dynamics = 'bfgs' 
+   cell_dofree = 'ibrav' 
+   cell_factor = 4.0 
+   press_conv_thr = 1.0 
+   press = 500.0 
+&end 
+
+ATOMIC_SPECIES 
+   Na   22.98976928    Na_ONCV_PBE_sr.upf 
+   Li   6.941    Li_ONCV_PBE_sr.upf 
+
+ATOMIC_POSITIONS crystal 
+   Na    0.860675    0.4335549999999999    0.7240530000000001    
+   Na    0.1393250000000001    -0.4335550000000003    1.2759469999999995    
+   Na    0.7240530000000002    -0.13932500000000025    1.4335549999999997    
+   Na    0.27594699999999994    0.13932499999999984    0.5664449999999999    
+   Na    1.4335550000000001    -0.27594700000000005    0.8606749999999999    
+   Na    -0.4335550000000001    0.2759469999999997    1.1393249999999997    
+   Li    0.0    0.0    0.0    
+K_POINTS automatic 
+5  5  5    0  0  0  

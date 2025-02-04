@@ -1,0 +1,53 @@
+&CONTROL 
+   calculation = 'vc-relax'
+   restart_mode = 'from_scratch' 
+   prefix = 'BeH2' 
+   tstress = .true. 
+   tprnfor = .true. 
+   pseudo_dir = '../pseudo' 
+   outdir = './output' 
+   forc_conv_thr = 0.001
+   etot_conv_thr = 0.0001
+&end 
+&SYSTEM 
+   ibrav = 6 
+   nat = 6 
+   ntyp = 2 
+   celldm(1) = 6.333205976368144 
+   celldm(3) = 0.6345754371055774 
+   ecutwfc = 80 
+   occupations = 'smearing' 
+   smearing = 'marzari-vanderbilt' 
+   degauss = 0.02 
+&end 
+&ELECTRONS 
+   conv_thr =  1e-08 
+   mixing_beta = 0.7 
+   electron_maxstep =100
+&end 
+&IONS 
+   ion_dynamics = 'bfgs' 
+   upscale = 100.0
+   trust_radius_max = 0.8
+&end 
+&CELL 
+   cell_dynamics = 'bfgs' 
+   cell_dofree = 'ibrav' 
+   cell_factor = 4.0 
+   press_conv_thr = 1.0 
+   press = 500.0 
+&end 
+
+ATOMIC_SPECIES 
+   Be   9.012182    Be_ONCV_PBE_sr.upf 
+   H   1.00794    H_ONCV_PBE_sr.upf 
+
+ATOMIC_POSITIONS crystal 
+   Be    0.0    0.0    0.0    
+   Be    0.5    0.5    0.5    
+   H    0.200402    0.200402    0.5    
+   H    0.799598    0.799598    0.5    
+   H    0.29959800000000003    0.700402    0.0    
+   H    0.700402    0.29959800000000003    0.0    
+K_POINTS automatic 
+7  7  12    0  0  0  
