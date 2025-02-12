@@ -43,7 +43,7 @@ if hyperparameters['comp'] == 1:
 else:
     n_possible_couples = 210
 
-dir_temp = f'./{hyperparameters['comp']}/'
+dir_temp = f'./{hyperparameters["comp"]}/'
 create_directory(dir_temp)
 
 import json
