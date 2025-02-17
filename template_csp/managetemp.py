@@ -858,6 +858,7 @@ class PairSet:
 
 def generate_one_templateset(hyperparameters, test_elements, dist_function, clusters = None):
     template = TemplateSet(test_elements=test_elements, comp = hyperparameters['comp'], clusters=clusters)
+    
 
     tries = 0
 

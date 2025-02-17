@@ -19,9 +19,9 @@ test_elements=['Be', 'B', 'N', 'Mg', 'O', 'Li', 'C', 'Na', 'Si', 'S', 'Cl', 'F',
 
 hyperparameters = {
     'ntemp_start' : 1,
-    'ntemp_end' : 30,
+    'ntemp_end' : 50,
 
-    'comp' : 2,
+    'comp' : 1,
     'lev_gen' : 0.8,
     'lev_gen_initial' : 0.8,
     'step' : 0.1,
@@ -34,7 +34,7 @@ hyperparameters = {
     'weight_occurrence' : 1,
     'weight_sg' : 0.001,
 
-    'n_pairs' : 210,    
+    'n_pairs' : 105,    
 }
 random.seed(time.time())
 

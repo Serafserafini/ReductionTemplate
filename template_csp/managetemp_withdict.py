@@ -203,6 +203,7 @@ class TemplateSet:
             
             else:
                 extraction_list = [x for x in self.gen_pairs if x not in self.banned_pairs]
+
             
             random_element_pair = random.sample(extraction_list,1)[0]
             
@@ -524,6 +525,7 @@ class PairSet:
                         fstdout.write('WARNING: too many tries, no new pair added\n')
                 return
             tries+=1
+
             while True:
                 if self.flag_cluster:
                     self.trial_cluster = None
@@ -572,7 +574,6 @@ class PairSet:
                         continue
                 else:
                     extraction_list = [x for x in self.possible_pairs if (x not in self.banned_pairs and x not in self.pairs)]
-
                 random_element_pair = random.sample(extraction_list,1)[0]
                 if self.comp == 1:
                     random_element_pair.sort()
@@ -581,7 +582,7 @@ class PairSet:
                 elif random_element_pair not in self.pairs:
                     A=random_element_pair[0]
                     B=random_element_pair[1]
-                    break
+                break
 
 
             new_ranking = np.zeros(self.num_template)
@@ -815,8 +816,8 @@ def generate_one_templateset(hyperparameters, test_elements, dist_function = lev
         template.own_relax()
         template.update(n_possible_temp, hyperparameters)
 
-
     while template.num_template < hyperparameters['n_template']:
+
         if tries >= 10:
             with open('log.txt','a') as fstdout:
                 fstdout.write(f'WARNING: too many tries, lowering lev thr from {hyperparameters["lev_gen"]} to {hyperparameters["lev_gen"]-hyperparameters["step"]}\n')
