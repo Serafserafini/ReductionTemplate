@@ -8,24 +8,44 @@ from template_csp.managetemp_withdict import generate_one_templateset, generate_
 import template_csp.managetemp_withdict as mte
 from template_csp.distances import levensthein_distance, dist1, dist2, dist3
 import json
+import argparse
 
+os.environ["OMP_NUM_THREADS"] = "128"  # Per OpenMP
+os.environ["OPENBLAS_NUM_THREADS"] = "128"  # Per NumPy
+os.environ["MKL_NUM_THREADS"] = "128"  # Per Intel MKL
+os.environ["NUMEXPR_NUM_THREADS"] = "128"  # Per NumExpr
 
 def create_directory(directory):
     if not os.path.exists(directory):
         os.makedirs(directory)
 
+# Argomenti da riga di comando
+parser = argparse.ArgumentParser()
+parser.add_argument('-c', '--comp', type=int, default=1, help='Composition of the compounds')
+parser.add_argument('-i', '--ntempinit', type=int, default=1, help='Number of templates to start with')
+parser.add_argument('-f', '--ntempfinal', type=int, default=50, help='Number of templates to end with')
+parser.add_argument('-s', '--sets', type=int, default=20, help='Number of sets to generate')
+parser.add_argument('-j', '--jobid', type=int, default=1, help='Job ID')
+args = parser.parse_args()
+
+
+comp = args.comp
+ntemp_start = args.ntempinit
+ntemp_end = args.ntempfinal
+n_sets = args.sets
+job_id = args.jobid
 
 test_elements=['Be', 'B', 'N', 'Mg', 'O', 'Li', 'C', 'Na', 'Si', 'S', 'Cl', 'F', 'P', 'H', 'Al']
 
 hyperparameters = {
-    'ntemp_start' : 1,
-    'ntemp_end' : 50,
+    'ntemp_start' : ntemp_start,
+    'ntemp_end' : ntemp_end,
 
-    'comp' : 1,
-    'lev_gen' : 0.8,
-    'lev_gen_initial' : 0.8,
+    'comp' : comp,
+    'lev_gen' : 0.0,
+    'lev_gen_initial' : 0.0,
     'step' : 0.1,
-    'n_sets' : 5,
+    'n_sets' : n_sets,
     'n_template' : 1,
 
     'id_set' : 1,
@@ -34,24 +54,27 @@ hyperparameters = {
     'weight_occurrence' : 1,
     'weight_sg' : 0.001,
 
-    'n_pairs' : 105,    
+    'n_pairs' : 210,    
+    'job_id' : job_id
 }
 random.seed(time.time())
+# ntem = [86, 157, 92, 79]
+
 
 if hyperparameters['comp'] == 1:
     n_possible_couples = 105
+    hyperparameters['n_pairs'] = 105
 else:
     n_possible_couples = 210
 
 dir_temp = f'./{hyperparameters["comp"]}/'
 create_directory(dir_temp)
 
-import json
 with open(dir_temp + 'params.json', 'w') as f:
     json.dump(hyperparameters, f, indent=4)
 
 # Range in cui varia il numero di template estratti
-ntemp_studied = hyperparameters['ntemp_end'] - hyperparameters['ntemp_start']
+ntemp_studied = hyperparameters['ntemp_end'] - hyperparameters['ntemp_start'] + 1
 
 # Vettori per i risultati globali
 means = np.zeros(ntemp_studied)
@@ -60,6 +83,9 @@ stds = np.zeros(ntemp_studied)
 tempmeans = np.zeros(ntemp_studied)
 tempstds = np.zeros(ntemp_studied)
 
+means_bef = np.zeros(ntemp_studied)
+stds_bef = np.zeros(ntemp_studied)
+
 for i in tqdm(range(hyperparameters['ntemp_start'],hyperparameters['ntemp_end'], 1)):
 
     hyperparameters['n_template'] = i
@@ -67,8 +93,9 @@ for i in tqdm(range(hyperparameters['ntemp_start'],hyperparameters['ntemp_end'],
     # vettori per store di errore totale e numero di template rimanenti del singolo set
     errors = np.zeros(hyperparameters['n_sets'])
     n_templates = np.zeros(hyperparameters['n_sets'])
+    errors_bef = np.zeros(hyperparameters['n_sets'])
     
-    with open('log.txt','a') as fstdout:
+    with open(f'log{hyperparameters["job_id"]}.txt','a') as fstdout:
         fstdout.write('##################################################\n')
         fstdout.write(f'Generating template set with {i} templates\n')
         fstdout.write('##################################################\n')
@@ -90,23 +117,38 @@ for i in tqdm(range(hyperparameters['ntemp_start'],hyperparameters['ntemp_end'],
         # Salvataggio del template set su file
     
         # Salvataggio dei risultati per ogni set
-        errors[k] = reduced_set.total_error(hyperparameters)
-        n_templates[k] = len(reduced_set.reduced_set(hyperparameters))
-
+        errors[k] = reduced_set.total_error()
+        n_templates[k] = len(reduced_set.reduced_set())
+        errors_bef[k] = template_set.err_before()
 
 
     # Errore totale con deviazione standard
-    means[i-hyperparameters['ntemp_start']] = np.mean(errors)
-    stds[i-hyperparameters['ntemp_start']] = np.std(errors)
+    means[i] = np.mean(errors)
+    stds[i] = np.std(errors)
+    with open(dir_temp+f'TotalStatics.csv', 'r') as f:
+        lines = f.readlines()
+    lines [hyperparameters['ntemp_start'] + i - 1] = f'{hyperparameters["ntemp_start"] + i - 1}, {means[i]}, {stds[i]}\n'
+    with open(dir_temp+f'TotalStatics.csv', 'w') as f:
+        f.writelines(lines)
 
     # Numero di template rimanenti con deviazione standard
-    tempmeans[i-hyperparameters['ntemp_start']] = np.mean(n_templates)
-    tempstds[i-hyperparameters['ntemp_start']] = np.std(n_templates)
-    
-    df_tot = pd.DataFrame({'Means': means, 'Stds': stds})
+    tempmeans[i] = np.mean(n_templates)
+    tempstds[i] = np.std(n_templates)
+    with open(dir_temp+f'NumberTempRedu.csv', 'r') as f:
+        lines = f.readlines()
+    lines [hyperparameters['ntemp_start'] + i - 1] = f'{hyperparameters["ntemp_start"] + i - 1}, {tempmeans[i]}, {tempstds[i]}\n'
+    with open(dir_temp+f'NumberTempRedu.csv', 'w') as f:
+        f.writelines(lines)
 
-    df_temp = pd.DataFrame({'Means': tempmeans, 'Stds': tempstds})
+    # Errore totale con deviazione standard prima della riduzione
+    means_bef[i] = np.mean(errors_bef)
+    stds_bef[i] = np.std(errors_bef)
+    with open(dir_temp+f'TotalStaticsBefore.csv', 'r') as f:
+        lines = f.readlines()
+    lines [hyperparameters['ntemp_start'] + i - 1] = f'{hyperparameters["ntemp_start"] + i - 1}, {means_bef[i]}, {stds_bef[i]}\n'
+    with open(dir_temp+f'TotalStaticsBefore.csv', 'w') as f:
+        f.writelines(lines)
 
-    # Salvataggio dei risultati su file
-    df_tot.to_csv(dir_temp+f'TotalStatics.csv', header=None)
-    df_temp.to_csv(dir_temp+f'NumberTempRedu.csv', header=None)
+
+
+

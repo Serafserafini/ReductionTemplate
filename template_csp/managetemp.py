@@ -434,21 +434,37 @@ class TemplateSet:
     
     def err_before(self):
         differences = []
-        for k in range(len(self.test_elements)):
-            for l in range(k+1,len(self.test_elements)):
-                cp = [self.test_elements[k], self.test_elements[l]]
-                cp.sort()
-                try_couple = cp[0]+cp[1]
+        if self.comp == 1:
+            for k in range(len(self.test_elements)):
+                for l in range(k+1,len(self.test_elements)):
+                    cp = [self.test_elements[k], self.test_elements[l]]
+                    cp.sort()
+                    try_couple = cp[0]+cp[1]
 
-                ent_gs = (self.gs_df.loc[self.gs_df['COUPLES'] == try_couple].iloc[0,1]) #already per atom  
-                ent_temp = np.zeros(self.num_template)
-                for id_template in range(self.num_template):
-                    ent_temp[id_template] = self.df.loc[try_couple, f'{self.couples[id_template][0][0]}{self.couples[id_template][0][1]}_{self.couples[id_template][1]}'] #already per atom
-                ent_temp.sort()
-                differences.append( -( ent_gs - ent_temp[0] )) 
-        err = 0
-        for i in differences:
-            err += max(i/len(differences), 0)
+                    ent_gs = (self.gs_df.loc[self.gs_df['COUPLES'] == try_couple].iloc[0,1]) #already per atom  
+                    ent_temp = np.zeros(self.num_template)
+                    for id_template in range(self.num_template):
+                        ent_temp[id_template] = self.df.loc[try_couple, f'{self.couples[id_template][0][0]}{self.couples[id_template][0][1]}_{self.couples[id_template][1]}'] #already per atom
+                    ent_temp.sort()
+                    differences.append( -( ent_gs - ent_temp[0] )) 
+            err = 0
+            for i in differences:
+                err += max(i/len(differences), 0)
+        else:
+            for k in self.test_elements:
+                for l in self.test_elements:
+                    if k == l:
+                        continue
+                    try_couple = k+l
+                    ent_gs = (self.gs_df.loc[self.gs_df['COUPLES'] == try_couple].iloc[0,1])
+                    ent_temp = np.zeros(self.num_template)
+                    for id_template in range(self.num_template):
+                        ent_temp[id_template] = self.df.loc[try_couple, f'{self.couples[id_template][0][0]}{self.couples[id_template][0][1]}_{self.couples[id_template][1]}']
+                    ent_temp.sort()
+                    differences.append( -( ent_gs - ent_temp[0] ))
+            err = 0
+            for i in differences:
+                err += max(i/len(differences), 0)
         return err
 
 

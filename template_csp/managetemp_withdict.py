@@ -32,16 +32,17 @@ def create_directory(directory):
 
 
 class TemplateSet:
-    def __init__(self, test_elements, restart_file = None, comp = 1, mother_dir = './TEMPLATES/', clusters = None) -> None:
+    def __init__(self, test_elements, hyperparameters, restart_file = None, comp = 1, mother_dir = './TEMPLATES/', clusters = None) -> None:
         self.dir_all_Individuals = op.join(mother_dir , f'SETUP_COMP{comp}', 'all_Individuals')
         self.dir_all_poscars = op.join(mother_dir , f'SETUP_COMP{comp}', 'all_poscars')
         self.test_elements = test_elements
+
+        self.hyperparameters = hyperparameters
 
         os.makedirs(self.dir_all_Individuals, exist_ok=True)
         os.makedirs(self.dir_all_poscars, exist_ok=True)
 
         self.gen_pairs = []
-
         if comp == 1:
             for i in range(len(test_elements)):
                 for j in range(i+1, len(test_elements)):
@@ -58,11 +59,11 @@ class TemplateSet:
 
         with open(os.path.join(os.path.dirname(os.path.dirname(__file__)),f'ENTHALPY/A{comp}B.json'), 'r') as f:
             self.ent_dict = json.load(f)
-        with open(os.path.join(os.path.dirname(os.path.dirname(__file__)),f'ENTHALPY/EntGs.json'), 'r') as f:
+        with open(os.path.join(os.path.dirname(os.path.dirname(__file__)),f'ENTHALPY/EntGS.json'), 'r') as f:
             self.gs_dict = json.load(f)
 
 
-        self.comp = comp
+        self.comp = int(comp)
         self.num_template = 0
         self.n_fails = 0
         
@@ -80,7 +81,7 @@ class TemplateSet:
                 self.original_clusters.append((int(cluster)-1,clusters[cluster]['pairs']))
                 self.freq_cluster.append(clusters[cluster]['freq'])
             
-        self.pairs = [] #pairs chosen for the templates
+        self.pairs = [] #tuple like (pair, sg)
         self.banned_pairs = [] #pairs with no available templates (Already  chosen or non existent)
         self.poscars = []
         
@@ -140,7 +141,7 @@ class TemplateSet:
 
     def is_not_in_pair(self, SG):
         for i in self.pairs:
-            if i[1] == SG:
+            if i[1] % 1000 == SG:
                 return False
         return True
     
@@ -210,54 +211,58 @@ class TemplateSet:
             A=random_element_pair[0]
             B=random_element_pair[1]
             
-            with open('log.txt','a') as fstdout:
+            with open(f'log{self.hyperparameters["job_id"]}.txt','a') as fstdout:
                     fstdout.write(f'Trying generating new template with: {A+B} (Try #{count_flag})\n')
 
             df_individuals = read_individuals(self.dir_all_Individuals+f'/{A+B}_Individuals')
             P, SG = best_structures(df_individuals, 0.1, self.dir_all_poscars+f'/{A+B}_gatheredPOSCARS')
                 
             if len(SG) > 0:
-                with open('log.txt','a') as fstdout:
+                with open(f'log{self.hyperparameters["job_id"]}.txt','a') as fstdout:
                         fstdout.write(f'There are {len(SG)} possible templates: {SG}\n')
                 self.trial_pair = random_element_pair
+                sg_of_pair = []
                 for k in range(len(SG)):
+                    sg_of_pair.append(int(SG[k]))
                     if self.is_not_in_pair(SG[k]):
                         self.trial_poscar = P[k]
-                        self.trial_SG = int(SG[k])
+                        self.trial_SG = int(SG[k]) + 1000 * (sg_of_pair.count(int(SG[k]))-1)
                         break
                 
                 if self.trial_SG is None:
-                    with open('log.txt','a') as fstdout:
+                    with open(f'log{self.hyperparameters["job_id"]}.txt','a') as fstdout:
                             fstdout.write(f'All possible templates simmetries are already chosen: {SG}\n')
+                    
+                    sg_of_pair = []
                     for k in range(len(SG)):
-                        
+                        sg_of_pair.append(int(SG[k]))
+                        template_already_chosen = False
                         for l in self.pairs:
-                            template_already_chosen = False
-                            if l[1] == SG[k] and l[0] == self.trial_pair:
-                                with open('log.txt','a') as fstdout:
+                            if l[1] == (SG[k] + 1000 * (sg_of_pair.count(int(SG[k]))-1)) and l[0] == self.trial_pair:
+                                with open(f'log{self.hyperparameters["job_id"]}.txt','a') as fstdout:
                                         fstdout.write(f'The pair has been already chosen with {l}\n')
                                 template_already_chosen = True
                                 break
                         
                         if not template_already_chosen:
                             self.trial_poscar = P[k]
-                            self.trial_SG = int(SG[k])
+                            self.trial_SG = int(SG[k]) + 1000 * (sg_of_pair.count(int(SG[k]))-1)
                             break
 
                     if template_already_chosen:
                         self.banned_pairs.append(self.trial_pair)
-                        with open('log.txt','a') as fstdout:
+                        with open(f'log{self.hyperparameters["job_id"]}.txt','a') as fstdout:
                                 fstdout.write(f'All the structure near ground state have been already chosen: the pair {self.trial_pair[0]+self.trial_pair[1]} won\'t be sorted again\n')
                         continue
                 break   
             else:
-                with open('log.txt','a') as fstdout:
+                with open(f'log{self.hyperparameters["job_id"]}.txt','a') as fstdout:
                         fstdout.write(f'No structures with high simmetry near ground state: choosign new pair\n')
                 self.banned_pairs.append(random_element_pair)
                 continue
         
         
-        with open('log.txt','a') as fstdout:
+        with open(f'log{self.hyperparameters["job_id"]}.txt','a') as fstdout:
                 fstdout.write(f'The pair {A+B} tries to make a structure with spacegroup {self.trial_SG} as the {self.num_template+1}-th template\n')
         return len(SG)
     
@@ -360,15 +365,15 @@ class TemplateSet:
         self.poscars.append(self.trial_poscar)
         self.num_template += 1
         self.order()
-        with open('log.txt','a') as fstdout:
+        with open(f'log{self.hyperparameters["job_id"]}.txt','a') as fstdout:
                 fstdout.write(f'The new template has been added to the set succesfully: {self.trial_pair[0]+self.trial_pair[1]} {self.trial_SG} \n')
-                fstdout.write(f'The current distance threshold is {hyperparameters["lev_gen"]}\n')
+                fstdout.write(f'The current distance threshold is {hyperparameters["lev_gen"]:.1f}\n')
         count = 0
         for i in self.pairs:
             if i[0] == self.trial_pair:
                 count+=1
         if count == n_possible_templates:
-            with open('log.txt','a') as fstdout:
+            with open(f'log{self.hyperparameters["job_id"]}.txt','a') as fstdout:
                     fstdout.write(f'All the structure near ground state have been already chosen: the pair {self.trial_pair[0]+self.trial_pair[1]} won\'t be sorted again\n')
             self.banned_pairs.append(self.trial_pair)
         return 
@@ -399,37 +404,54 @@ class TemplateSet:
     
     def err_before(self):
         differences = []
-        for k in range(len(self.test_elements)):
-            for l in range(k+1,len(self.test_elements)):
-                cp = [self.test_elements[k], self.test_elements[l]]
-                cp.sort()
-                try_pair = cp[0]+cp[1]
+        if self.comp == 1:
+            for k in range(len(self.test_elements)):
+                for l in range(k+1,len(self.test_elements)):
+                    cp = [self.test_elements[k], self.test_elements[l]]
+                    cp.sort()
+                    try_pair = cp[0]+cp[1]
 
-                ent_gs = self.gs_dict[str(self.comp)][try_pair]   
-                ent_temp = np.zeros(self.num_template)
-                for id_template in range(self.num_template):
-                    ent_temp[id_template] = self.ent_dict[try_pair][f'{self.pairs[id_template][0][0]}{self.pairs[id_template][0][1]}_{self.pairs[id_template][1]}'] 
-                ent_temp.sort()
-                differences.append( -( ent_gs - ent_temp[0] )) 
-        err = 0
-        for i in differences:
-            err += max(i/len(differences), 0)
+                    ent_gs = self.gs_dict[str(int(self.comp))][try_pair]   
+                    ent_temp = np.zeros(self.num_template)
+                    for id_template in range(self.num_template):
+                        ent_temp[id_template] = self.ent_dict[try_pair][f'{self.pairs[id_template][0][0]}{self.pairs[id_template][0][1]}_{self.pairs[id_template][1]}'] 
+                    ent_temp.sort()
+                    differences.append( -( ent_gs - ent_temp[0] )) 
+            err = 0
+            for i in differences:
+                err += max(i/len(differences), 0)
+        else:
+            for k in self.test_elements:
+                for l in self.test_elements:
+                    if k == l:
+                        continue
+                    try_pair = k+l
+
+                    ent_gs = self.gs_dict[str(int(self.comp))][try_pair]   
+                    ent_temp = np.zeros(self.num_template)
+                    for id_template in range(self.num_template):
+                        ent_temp[id_template] = self.ent_dict[try_pair][f'{self.pairs[id_template][0][0]}{self.pairs[id_template][0][1]}_{self.pairs[id_template][1]}'] 
+                    ent_temp.sort()
+                    differences.append( -( ent_gs - ent_temp[0] )) 
+            err = 0
+            for i in differences:
+                err += max(i/len(differences), 0)
         return err
 
 
 
 class PairSet:
-    def __init__(self, template_set, test_elements, dist_function = levensthein_distance, relaxed_pairs = None, comp=1, mother_dir = './SETUP_FILES/', flag_temp_final = False, clusters = None) -> None:
+    def __init__(self, template_set, test_elements, hyperparameters, dist_function = levensthein_distance, relaxed_pairs = None, comp=1, mother_dir = './SETUP_FILES/', clusters = None) -> None:
         
         #DA METTERE INDIPENDENZA DA TEMPLATE SET
         self.test_elements=test_elements
         self.dist_function = dist_function 
         self.from_scratch = True   
-        self.flag_temp_final = flag_temp_final
         self.num_pairs = 0
         self.n_fails = 0
         self.num_template = template_set.num_template
         self.comp = template_set.comp
+        self.hyperparameters = hyperparameters
 
         self.possible_pairs = []
         if comp == 1:
@@ -462,7 +484,7 @@ class PairSet:
             self.one_el_dict = json.load(f)
         with open(os.path.join(os.path.dirname(os.path.dirname(__file__)),f'ENTHALPY/A{comp}B.json'), 'r') as f:
             self.ent_dict = json.load(f)
-        with open(os.path.join(os.path.dirname(os.path.dirname(__file__)),f'ENTHALPY/EntGs.json'), 'r') as f:
+        with open(os.path.join(os.path.dirname(os.path.dirname(__file__)),f'ENTHALPY/EntGS.json'), 'r') as f:
             self.gs_dict = json.load(f)
 
         self.flag_cluster = False
@@ -521,7 +543,7 @@ class PairSet:
         tries=0
         while True:
             if tries>=5:
-                with open('log.txt','a') as fstdout:
+                with open(f'log{self.hyperparameters["job_id"]}.txt','a') as fstdout:
                         fstdout.write('WARNING: too many tries, no new pair added\n')
                 return
             tries+=1
@@ -674,8 +696,8 @@ class PairSet:
             form_negative[i] = np.sum(self.data[0,i] < 0)/self.num_pairs
         return form_negative
 
-    def reduced_set(self, hyperparameters):
-        if not self.flag_temp_final:
+    def reduced_set(self):
+        if self.hyperparameters['n_final_templates'] == -1 or 'n_final_templates' not in self.hyperparameters.keys():
             # Compute the reduced set of templates
             form_negative = self.formation_percentage()
             ist = self.template_gs()
@@ -685,18 +707,18 @@ class PairSet:
             lev_matrix = self.dist_matrix()
             np.fill_diagonal(lev_matrix, 10)
 
-            while lev_matrix.min() < hyperparameters['lev_red']:
+            while lev_matrix.min() < self.hyperparameters['lev_red']:
                 idx = np.unravel_index(np.argmin(lev_matrix), lev_matrix.shape)
                 i = idx[0]
                 j = idx[1]
 
-                a_j = form_negative[j] * hyperparameters['weight_formation_entalphy'] 
-                b_j = ist[j] * hyperparameters['weight_occurrence']/self.num_pairs
-                c_j = sg[j] * hyperparameters['weight_sg']
+                a_j = form_negative[j] * self.hyperparameters['weight_formation_entalphy'] 
+                b_j = ist[j] * self.hyperparameters['weight_occurrence']/self.num_pairs
+                c_j = sg[j] * self.hyperparameters['weight_sg']
 
-                a_i = form_negative[i] * hyperparameters['weight_formation_entalphy']
-                b_i = ist[i] * hyperparameters['weight_occurrence']/self.num_pairs
-                c_i = sg[i] * hyperparameters['weight_sg']
+                a_i = form_negative[i] * self.hyperparameters['weight_formation_entalphy']
+                b_i = ist[i] * self.hyperparameters['weight_occurrence']/self.num_pairs
+                c_i = sg[i] * self.hyperparameters['weight_sg']
 
                 score_j = a_j + b_j + c_j
                 score_i = a_i + b_i + c_i
@@ -727,18 +749,18 @@ class PairSet:
             lev_matrix = self.dist_matrix()
             np.fill_diagonal(lev_matrix, 10)
 
-            while len(set_of_templates) > hyperparameters['n_final_templates']:
+            while len(set_of_templates) > self.hyperparameters['n_final_templates']:
                 idx = np.unravel_index(np.argmin(lev_matrix), lev_matrix.shape)
                 i = idx[0]
                 j = idx[1]
 
-                a_j = form_negative[j] * hyperparameters['weight_formation_entalphy'] 
-                b_j = ist[j] * hyperparameters['weight_occurrence']/self.num_pairs
-                c_j = sg[j] * hyperparameters['weight_sg']
+                a_j = form_negative[j] * self.hyperparameters['weight_formation_entalphy'] 
+                b_j = ist[j] * self.hyperparameters['weight_occurrence']/self.num_pairs
+                c_j = sg[j] * self.hyperparameters['weight_sg']
 
-                a_i = form_negative[i] * hyperparameters['weight_formation_entalphy']
-                b_i = ist[i] * hyperparameters['weight_occurrence']/self.num_pairs
-                c_i = sg[i] * hyperparameters['weight_sg']
+                a_i = form_negative[i] * self.hyperparameters['weight_formation_entalphy']
+                b_i = ist[i] * self.hyperparameters['weight_occurrence']/self.num_pairs
+                c_i = sg[i] * self.hyperparameters['weight_sg']
 
                 score_j = a_j + b_j + c_j
                 score_i = a_i + b_i + c_i
@@ -761,10 +783,10 @@ class PairSet:
 
         return set_of_templates
 
-    def error_single_composition(self, hyperparameters):
+    def error_single_composition(self):
         # Compute the error of the single composition
         differences = []
-        set_of_remaining_templates = self.reduced_set(hyperparameters)
+        set_of_remaining_templates = self.reduced_set()
 
         if self.comp == 1:
             for k in range(len(self.test_elements)):
@@ -774,7 +796,7 @@ class PairSet:
                     cp.sort()
                     try_pair = cp[0]+cp[1]
 
-                    ent_gs = self.gs_dict[str(self.comp)][try_pair]  
+                    ent_gs = self.gs_dict[str(int(self.comp))][try_pair]  
                     ent_temp = np.zeros(len(set_of_remaining_templates))
                     for j, i in enumerate(set_of_remaining_templates):
                         ent_temp[j] = self.ent_dict[try_pair][f'{self.gen_pairs[i][0]}{self.gen_pairs[i][1]}_{self.sg[i]}'] 
@@ -789,7 +811,7 @@ class PairSet:
                     cp = [self.test_elements[k], self.test_elements[l]]
                     try_pair = cp[0]+cp[1]
 
-                    ent_gs = self.gs_dict[str(self.comp)][try_pair]  
+                    ent_gs = self.gs_dict[str(int(self.comp))][try_pair]  
                     ent_temp = np.zeros(len(set_of_remaining_templates))
                     for j, i in enumerate(set_of_remaining_templates):
                         ent_temp[j] = self.ent_dict[try_pair][f'{self.gen_pairs[i][0]}{self.gen_pairs[i][1]}_{self.sg[i]}'] 
@@ -797,9 +819,9 @@ class PairSet:
                     differences.append( -( ent_gs - ent_temp[0] )) 
         return differences
 
-    def total_error(self, hyperparameters):
+    def total_error(self):
         # Compute the total error of the reduced set
-        differences = self.error_single_composition(hyperparameters)
+        differences = self.error_single_composition()
         err = 0
         for i in differences:
             err += max(i/len(differences), 0)
@@ -807,7 +829,7 @@ class PairSet:
     
 
 def generate_one_templateset(hyperparameters, test_elements, dist_function = levensthein_distance, clusters = None):
-    template = TemplateSet(test_elements=test_elements, comp = hyperparameters['comp'], clusters=clusters)
+    template = TemplateSet(test_elements=test_elements, hyperparameters=hyperparameters, comp = hyperparameters['comp'], clusters=clusters)
 
     tries = 0
 
@@ -819,7 +841,7 @@ def generate_one_templateset(hyperparameters, test_elements, dist_function = lev
     while template.num_template < hyperparameters['n_template']:
 
         if tries >= 10:
-            with open('log.txt','a') as fstdout:
+            with open(f'log{hyperparameters["job_id"]}.txt','a') as fstdout:
                 fstdout.write(f'WARNING: too many tries, lowering lev thr from {hyperparameters["lev_gen"]} to {hyperparameters["lev_gen"]-hyperparameters["step"]}\n')
             hyperparameters["lev_gen"] -= hyperparameters["step"] 
             tries = 0 
@@ -835,11 +857,11 @@ def generate_one_templateset(hyperparameters, test_elements, dist_function = lev
         if not clusters:
             if template.num_template >= 7:
                 dist_value = template.distance(dist_function, vec)
-                with open('log.txt','a') as fstdout:
+                with open(f'log{hyperparameters["job_id"]}.txt','a') as fstdout:
                     fstdout.write(f'Try #{tries} \n Levenshtein distances: {dist_value}\n')
 
                 if np.any(dist_value < hyperparameters["lev_gen"]):
-                    with open('log.txt','a') as fstdout:
+                    with open(f'log{hyperparameters["job_id"]}.txt','a') as fstdout:
                         fstdout.write('Levensthein distance too low with some other template, trying new pair \n')
                     continue
 
@@ -860,7 +882,7 @@ def generate_one_templateset(hyperparameters, test_elements, dist_function = lev
     return template
 
 def generate_one_pairset (template_prod, hyperparameters, test_elements, dist_function = levensthein_distance, clusters = None):
-    reduction_set = PairSet(template_prod, test_elements, dist_function, comp=hyperparameters['comp'], clusters=clusters)
+    reduction_set = PairSet(template_prod, test_elements, hyperparameters, dist_function, comp=hyperparameters['comp'], clusters=clusters)
 
     while reduction_set.num_pairs < hyperparameters['n_pairs']:
         reduction_set.add_pair()
