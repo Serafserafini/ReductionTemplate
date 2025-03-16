@@ -149,7 +149,7 @@ class TemplateSet:
         count_flag = 0
 
 
-        while count_flag <= 50:
+        while count_flag <= 210:
             count_flag+=1
 
             self.trial_pair = None
@@ -215,8 +215,9 @@ class TemplateSet:
                     fstdout.write(f'Trying generating new template with: {A+B} (Try #{count_flag})\n')
 
             df_individuals = read_individuals(self.dir_all_Individuals+f'/{A+B}_Individuals')
-            P, SG = best_structures(df_individuals, 0.1, self.dir_all_poscars+f'/{A+B}_gatheredPOSCARS')
-                
+            P, SG, keepit = best_structures(df_individuals, 0.1, self.dir_all_poscars+f'/{A+B}_gatheredPOSCARS', other_sg_min_acceptable = 142)
+            SG = [i for idx, i in enumerate(SG) if keepit[idx]]
+            P = [i for idx, i in enumerate(P) if keepit[idx]]    
             if len(SG) > 0:
                 with open(f'log{self.hyperparameters["job_id"]}.txt','a') as fstdout:
                         fstdout.write(f'There are {len(SG)} possible templates: {SG}\n')
@@ -677,6 +678,8 @@ class PairSet:
         for i in range(self.num_template):
             for j in range(self.num_template):
                 dist[i,j] = self.dist_function(matrix[:,i,:], matrix[:,j,:])
+                print(matrix[:,i,:], matrix[:,j,:], dist[i,j])
+        
         return dist
     
 
@@ -697,7 +700,7 @@ class PairSet:
         return form_negative
 
     def reduced_set(self):
-        if self.hyperparameters['n_final_templates'] == -1 or 'n_final_templates' not in self.hyperparameters.keys():
+        if 'n_final_templates' not in self.hyperparameters.keys():
             # Compute the reduced set of templates
             form_negative = self.formation_percentage()
             ist = self.template_gs()
@@ -883,10 +886,10 @@ def generate_one_templateset(hyperparameters, test_elements, dist_function = lev
 
 def generate_one_pairset (template_prod, hyperparameters, test_elements, dist_function = levensthein_distance, clusters = None):
     reduction_set = PairSet(template_prod, test_elements, hyperparameters, dist_function, comp=hyperparameters['comp'], clusters=clusters)
-
+    npair = 0
     while reduction_set.num_pairs < hyperparameters['n_pairs']:
+        npair+=1 
         reduction_set.add_pair()
-
     return reduction_set
 
 
