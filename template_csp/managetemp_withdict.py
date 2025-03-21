@@ -678,7 +678,6 @@ class PairSet:
         for i in range(self.num_template):
             for j in range(self.num_template):
                 dist[i,j] = self.dist_function(matrix[:,i,:], matrix[:,j,:])
-                print(matrix[:,i,:], matrix[:,j,:], dist[i,j])
         
         return dist
     

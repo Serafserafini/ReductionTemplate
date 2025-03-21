@@ -15,6 +15,21 @@ def levensthein_distance(a1,a2):
             dist+=1-float(i)/len(a1[1])
     return dist / ((len(a1[0]) + 1 ) / 2)
 
+def levensthein_distance_no_weight(a1,a2):
+    dist=0
+    a1 = a1.copy()
+    a2 = a2.copy()
+    sorted_idxA = np.argsort(a1[0])
+    sorted_idxB = np.argsort(a2[0])
+    a1[1] = a1[1][sorted_idxA]
+    a2[1] = a2[1][sorted_idxB]
+    a1[1] = a1[1].astype(int)
+    a2[1] = a2[1].astype(int)
+    for i in range(len(a1[1])):
+        if a1[1][i] != a2[1][i]:
+            dist += 1
+    return dist / (len(a1[0]))
+
 def dist1(a1,a2):
     dist=0
     for i in range(len(a1[0])):
@@ -50,36 +65,64 @@ def dist3 (a1, a2):
     return dist / ((len(a1[0]) + 1 ) / 2)
 
 
-# PERMUTATION DISTANCE
+import numpy as np
 
-def count_inversions(arr):
-    def merge_count_split_inv(left, right):
-        merged, i, j, inv_count = [], 0, 0, 0
+def count_weighted_inversions(arr):
+    n = len(arr)
+    weights = [1-i/len(arr) for i in range(1,len(arr))]
+
+
+    def merge_count_split_inv(left, right, left_indices, right_indices, current_seq, start_left, start_right, weights):
+        merged, merged_indices = [], []
+        i, j, inv_count = 0, 0, 0.0
+        
+        already_moved = []
         while i < len(left) and j < len(right):
+
             if left[i] <= right[j]:
                 merged.append(left[i])
+                merged_indices.append(left_indices[i])
                 i += 1
             else:
                 merged.append(right[j])
-                inv_count += len(left) - i  # Tutti gli elementi restanti in left sono inversioni
+                merged_indices.append(right_indices[j])
+                
+                # Calcola le posizioni globali reali
+                pos_i = start_left + i + already_moved.count(left[i])
+                pos_j = start_right + j
+
+                already_moved.append(left[i])
+                # Copia della sequenza per la stampa
+                current_seq[pos_i], current_seq[pos_j] = current_seq[pos_j], current_seq[pos_i]
+                
+                for k in range(pos_i, pos_j):
+                    inv_count += weights[k]
                 j += 1
+                
+
         merged += left[i:]
+        merged_indices += left_indices[i:]
         merged += right[j:]
-        return merged, inv_count
+        merged_indices += right_indices[j:]
 
-    def sort_and_count(arr):
+        return merged, merged_indices, inv_count
+
+    def sort_and_count(arr, indices, current_seq, start_index):
         if len(arr) <= 1:
-            return arr, 0
-        mid = len(arr) // 2
-        left, left_inv = sort_and_count(arr[:mid])
-        right, right_inv = sort_and_count(arr[mid:])
-        merged, split_inv = merge_count_split_inv(left, right)
-        return merged, left_inv + right_inv + split_inv
+            return arr, indices, 0.0
 
-    _, inv_count = sort_and_count(arr)
+        mid = len(arr) // 2
+        left, left_indices, left_inv = sort_and_count(arr[:mid], indices[:mid], current_seq, start_index)
+        right, right_indices, right_inv = sort_and_count(arr[mid:], indices[mid:], current_seq, start_index + mid)
+
+        merged, merged_indices, split_inv = merge_count_split_inv(left, right, left_indices, right_indices, current_seq, start_index, start_index + mid, weights)
+        return merged, merged_indices, left_inv + right_inv + split_inv
+
+    indices = list(range(n))
+    merged, _, inv_count = sort_and_count(arr, indices, arr.copy(), 0)  
     return inv_count
 
-def perm_distance(a1,a2):
+def perm_distance(a1, a2):
     a1 = a1.copy()
     a2 = a2.copy()
     sorted_idxA = np.argsort(a1[0])
@@ -91,8 +134,6 @@ def perm_distance(a1,a2):
     seq2 = seq2.astype(int)
     index_map = {value: i for i, value in enumerate(seq2)}
     perm = [index_map[value] for value in seq1]
-    num_transpositions = count_inversions(perm)
+    num_transpositions = count_weighted_inversions(perm)
     
-    n = len(seq1)
-    max_transpositions = n * (n - 1) // 2  # Numero massimo di swap nel caso peggiore
-    return num_transpositions / max_transpositions if max_transpositions > 0 else 0
+    return num_transpositions
