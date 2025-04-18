@@ -41,7 +41,6 @@ def best_structures(individuals_df, fitness_upto, gatheredPOSCARS_path, sg_min_a
     uniques = []
     SGs=[]
     structure_gs = Poscar.from_str(find_poscar(gatheredPOSCARS_path, individuals_df['ID'].iloc[0]))
-    discarded = []
     keep_it_mask = []
     
     if individuals_df['spacegroup'].iloc[0] > sg_min_acceptable:
@@ -74,6 +73,33 @@ def best_structures(individuals_df, fitness_upto, gatheredPOSCARS_path, sg_min_a
             else:
                 keep_it_mask.append(False)
     return uniques, SGs, keep_it_mask
+
+def delete_duplicates(individuals_df, gatheredPOSCARS_path, fitness_upto):
+    fitness_gs = individuals_df['fitness'].iloc[0]
+    uniques = []
+    index_to_delete = []
+    for i, line_individuals_df in individuals_df.iterrows():
+        if line_individuals_df['fitness'] - fitness_gs >= fitness_upto:
+            break
+        new_structure = Poscar.from_str(find_poscar(gatheredPOSCARS_path, line_individuals_df['ID']))
+        check_duplicate = False
+        for structure in uniques:
+            if StructureMatcher(ltol = 1.0, stol = 1.0, angle_tol = 10, scale=True).fit(structure.structure, new_structure.structure):
+                check_duplicate = True
+                break
+        if not check_duplicate:
+            uniques.append(new_structure)
+        else:
+            index_to_delete.append(i)
+    
+    individuals_df.drop(index_to_delete, inplace=True)
+    individuals_df.reset_index(drop=True, inplace=True)
+    return individuals_df
+
+
+
+
+
 
 def groundstate_structure(individuals_df, gatheredPOSCARS_path):
     structure_gs = Poscar.from_str(find_poscar(gatheredPOSCARS_path, individuals_df['ID'].iloc[0]))

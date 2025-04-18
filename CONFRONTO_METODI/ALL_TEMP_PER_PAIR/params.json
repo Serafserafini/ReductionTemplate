@@ -1,0 +1,17 @@
+{
+    "ntemp_start": 59,
+    "ntemp_end": 60,
+    "comp": 1,
+    "lev_gen": 0.0,
+    "lev_gen_initial": 0.0,
+    "step": 0.1,
+    "n_sets": 20,
+    "n_template": 1,
+    "id_set": 1,
+    "lev_red": 0.9,
+    "weight_formation_entalphy": 1,
+    "weight_occurrence": 1,
+    "weight_sg": 0.001,
+    "n_pairs": 105,
+    "job_id": 58
+}
