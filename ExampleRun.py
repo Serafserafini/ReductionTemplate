@@ -72,10 +72,11 @@ for comp, temp_init_list in tqdm(zip(complist, temp_list)):
                 
                 for try_pairs in range(n_try_pairs):
                     final_set = mte.generate_final_set(init_set, hyperparameters=hyperparameters, test_elements=test_elements, file_crit_pairs = crit_pairs)
-                    final_set.recap()
+                    
                     data[comp]['ErrAft'][temp_init][npair] += final_set.difference_from_uspex()/(n_set*n_try_pairs)
                     data1[comp][temp_init][npair] += float(final_set.count_crit_in_validation)/(n_set*n_try_pairs)
-        
+                    
+                    final_set.recap()
             
             npair = total_pairs
             hyperparameters["n_pairs"] = npair
