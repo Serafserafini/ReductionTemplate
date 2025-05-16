@@ -69,7 +69,8 @@ import numpy as np
 
 def count_weighted_inversions(arr):
     n = len(arr)
-    weights = [1-i/len(arr) for i in range(1,len(arr))]
+    weights = [1 for i in range(1,len(arr))]
+    #weights = [1-i/len(arr) for i in range(1,len(arr))]
 
 
     def merge_count_split_inv(left, right, left_indices, right_indices, current_seq, start_left, start_right, weights):
