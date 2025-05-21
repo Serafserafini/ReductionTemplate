@@ -296,7 +296,7 @@ class InitialSet:
 
 
 class FinalSet:
-    def __init__(self, template_set, test_elements, hyperparameters, restart_file = None, mother_dir = './SETUP_FILES/') -> None:
+    def __init__(self, template_set, test_elements, hyperparameters, restart_file = None) -> None:
         
         #DA METTERE INDIPENDENZA DA TEMPLATE SET
         self.test_elements = test_elements
@@ -377,8 +377,8 @@ class FinalSet:
                     self.comp = int(re.search(r'\d+', line).group())
                 
                 if line.startswith('NUMBER OF TEMPLATES'):
-                    self.num_final_temp = int(re.search(r'\d+', line).group())
-                    self.data = np.zeros((3, self.num_final_temp, self.num_pairs))
+                    self.num_final_template = int(re.search(r'\d+', line).group())
+                    self.data = np.zeros((3, self.num_final_template, self.num_pairs))
 
                 if flag_final_temp:
                     self.final_temp_names.append(line.strip())
@@ -392,7 +392,7 @@ class FinalSet:
                     flag_pairs = True   
 
             # CREATE RANKING VECTORS
-            for i in range(self.num_final_temp):
+            for i in range(self.num_final_template):
                 for j in range(self.num_pairs):
                     self.data[0,i,j] = self.ent_dict[self.pairs[j][0]+self.pairs[j][1]][f'{self.final_temp_names[i]}'] - (self.one_el_dict[self.pairs[j][0]] * self.comp + self.one_el_dict[self.pairs[j][1]]) / (self.comp + 1)
                     self.data[1,i,j] = j
