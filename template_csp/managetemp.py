@@ -356,7 +356,7 @@ class FinalSet:
             self.init_temp_names.append(f'{i[0][0]}{i[0][1]}_{i[1]}')
 
         self.num_final_template = 0
-        self.final_temp_names = []
+        self.final_temp_names = None
         
         self.data = np.zeros((3, self.num_init_template, self.num_pairs))  # matrix of the enthalpies of relaxed structures obtained by ralaxing validation pairs on templates in initial set
         
@@ -384,6 +384,7 @@ class FinalSet:
                     self.final_temp_names.append(line.strip())
                 if line.startswith('TEMPLATE NAMES'):
                     flag_final_temp = True
+                    self.final_temp_names = []
                     flag_pairs = False                    
                 
                 if flag_pairs:
@@ -430,6 +431,7 @@ class FinalSet:
         self.data[0,:,-1] = new_elements_of_ranking_vector                          # Enthalpy of the new pair for each template in the initial set
         self.data[1,:,-1] = self.num_pairs                                          # Id of the new pair
         self.pairs.append([A,B])
+        self.banned_pairs.append([A,B])
 
         if file_crit_pairs:
             with open(file_crit_pairs, 'r') as f:
@@ -625,7 +627,7 @@ class FinalSet:
 
         differences = []
 
-        if not self.final_temp_names:                                   # if the template is already reduced, we use the reduced set
+        if self.final_temp_names is not None:                                   # if the template is already reduced, we use the reduced set
             set_of_remaining_templates = self.reduced_set()
         else:
             set_of_remaining_templates = self.final_temp_names

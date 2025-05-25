@@ -12,7 +12,7 @@ def levensthein_distance(a1,a2):
     a2[1] = a2[1].astype(int)
     for i in range(len(a1[1])):
         if a1[1][i] != a2[1][i]:
-            dist+=1-float(i)/len(a1[1])
+            dist+=(1-float(i)/len(a1[1]))**2
     return dist / ((len(a1[0]) + 1 ) / 2)
 
 def levensthein_distance_no_weight(a1,a2):

@@ -9,7 +9,7 @@ hyperparameters = {
     "weight_sg" : 0.001,
     "weight_formation_entalphy" : 1, 
     "comp" : 1,
-    "lev_red" : 0.9,
+ 
     "n_pairs" : 105,
 
     "n_final_templates" : 1,
