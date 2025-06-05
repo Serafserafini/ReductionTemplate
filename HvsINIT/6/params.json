@@ -1,0 +1,14 @@
+{
+    "comp": 6,
+    "n_sets": 20,
+    "n_template": 79,
+    "id_set": 19,
+    "weight_formation_entalphy": 1,
+    "weight_occurrence": 1,
+    "weight_sg": 0.001,
+    "n_final_templates": 15,
+    "n_pairs": 105,
+    "job_id": 1,
+    "ntemp_end": 41,
+    "ntemp_start": 1
+}

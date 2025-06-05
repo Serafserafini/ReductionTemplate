@@ -14,7 +14,7 @@ import matplotlib.cm as cm
 
 from template_csp.manageuspex import read_individuals, best_structures
 from template_csp import manageqe as mqe
-from template_csp.distances import levensthein_distance
+from template_csp.distances import levensthein_distance, perm_distance
 from template_csp import cif2qe as c2q
 
 
@@ -79,7 +79,9 @@ class InitialSet:
         # self.flag_conv = True
         
         self.generative_pairs = []          # tuple like (pair, sg)
-        self.banned_pairs = []              # pairs with no available templates (Already  chosen or non existent)
+        self.banned_pairs = []  
+        if self.comp == 6:
+            self.banned_pairs = [['C','B']]            # pairs with no available templates (Already  chosen or non existent)
         # self.poscars = []
         
         self.from_scratch = True
@@ -428,7 +430,7 @@ class FinalSet:
 
     
         self.data = np.pad(self.data, ((0, 0), (0, 0), (0, 1)), constant_values=0)
-        self.data[0,:,-1] = new_elements_of_ranking_vector                          # Enthalpy of the new pair for each template in the initial set
+        self.data[0,:,-1] = new_elements_of_ranking_vector - new_elements_of_ranking_vector.min()
         self.data[1,:,-1] = self.num_pairs                                          # Id of the new pair
         self.pairs.append([A,B])
         self.banned_pairs.append([A,B])
@@ -627,7 +629,7 @@ class FinalSet:
 
         differences = []
 
-        if self.final_temp_names is not None:                                   # if the template is already reduced, we use the reduced set
+        if self.final_temp_names is None:                                   # if the template is already reduced, we use the reduced set
             set_of_remaining_templates = self.reduced_set()
         else:
             set_of_remaining_templates = self.final_temp_names

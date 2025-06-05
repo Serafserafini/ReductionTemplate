@@ -1,0 +1,130 @@
+NUMBER OF PAIRS 105
+COMPOSITION A 2 B
+NUMBER OF TEMPLATES 20
+USED PAIRS
+[Na S] 
+[P C] 
+[C N] 
+[O Be] 
+[C Si] 
+[Na F] 
+[Be F] 
+[O C] 
+[Si S] 
+[Si B] 
+[S Na] 
+[S C] 
+[F Al] 
+[Na F] 
+[Li Be] 
+[Na Li] 
+[Si Cl] 
+[O F] 
+[P H] 
+[H S] 
+[B Li] 
+[Si C] 
+[C N] 
+[F Si] 
+[F H] 
+[B N] 
+[Si O] 
+[Na Be] 
+[P H] 
+[S H] 
+[Al Cl] 
+[O S] 
+[Mg Cl] 
+[Al O] 
+[C P] 
+[Mg Al] 
+[C H] 
+[P Be] 
+[Si Al] 
+[F Li] 
+[C F] 
+[O Na] 
+[Si F] 
+[N Si] 
+[Si N] 
+[P C] 
+[O H] 
+[P B] 
+[C O] 
+[Mg C] 
+[Na Li] 
+[Na F] 
+[Mg Li] 
+[S Si] 
+[Li Al] 
+[Na C] 
+[Li Na] 
+[N P] 
+[Si F] 
+[Mg Si] 
+[Mg N] 
+[F B] 
+[F N] 
+[Be Li] 
+[Li N] 
+[H S] 
+[Cl S] 
+[O Al] 
+[Li N] 
+[Al Cl] 
+[O N] 
+[Li Be] 
+[Mg S] 
+[O Be] 
+[P N] 
+[Al Cl] 
+[B H] 
+[Li Al] 
+[B Be] 
+[Al Mg] 
+[Cl O] 
+[N P] 
+[H B] 
+[Al B] 
+[F P] 
+[P N] 
+[Be F] 
+[Be Mg] 
+[C F] 
+[H O] 
+[Cl Be] 
+[H Be] 
+[O S] 
+[O N] 
+[Na P] 
+[H O] 
+[H Al] 
+[F Al] 
+[F C] 
+[C F] 
+[P Si] 
+[C P] 
+[Mg P] 
+[Be Al] 
+[B S] 
+TEMPLATE NAMES
+BeH_166 
+BC_160 
+ClSi_140 
+LiSi_191 
+HO_102 
+CBe_156 
+NB_160 
+BeMg_227 
+SiMg_191 
+SiMg_227 
+SiB_164 
+LiP_139 
+SiO_166 
+CH_166 
+CH_1166 
+BeSi_216 
+NS_129 
+BS_141 
+SiN_187 
+MgH_164 
