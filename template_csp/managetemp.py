@@ -14,7 +14,7 @@ import matplotlib.cm as cm
 
 from template_csp.manageuspex import read_individuals, best_structures
 from template_csp import manageqe as mqe
-from template_csp.distances import levensthein_distance, perm_distance
+from template_csp.distances import levensthein_distance
 from template_csp import cif2qe as c2q
 
 
